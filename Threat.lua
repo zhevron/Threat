@@ -21,14 +21,14 @@ Threat.tDefaults = {
     nCombatDelay = 5,
     bUseClassColors = false,
     tColors = {
-      sSelf = "579c0cff",
-      sOthers = "0d8fd3ff",
-      [GameLib.CodeEnumClass.Warrior] = "eb1b1bff",
-      [GameLib.CodeEnumClass.Engineer] = "e18c20ff",
-      [GameLib.CodeEnumClass.Esper] = "0d8fd3ff",
-      [GameLib.CodeEnumClass.Medic] = "e9c024ff",
-      [GameLib.CodeEnumClass.Stalker] = "9a19e6ff",
-      [GameLib.CodeEnumClass.Spellslinger] = "579c0cff"
+      sSelf = { nR = 87, nG = 156, nB = 12, nA = 255 },
+      sOthers = { nR = 13, nG = 143, nB = 211, nA = 255 },
+      [GameLib.CodeEnumClass.Warrior] = { nR = 235, nG = 27, nB = 27, nA = 255 },
+      [GameLib.CodeEnumClass.Engineer] = { nR = 225, nG = 140, nB = 32, nA = 255 },
+      [GameLib.CodeEnumClass.Esper] = { nR = 13, nG = 143, nB = 211, nA = 255 },
+      [GameLib.CodeEnumClass.Medic] = { nR = 233, nG = 192, nB = 36, nA = 255 },
+      [GameLib.CodeEnumClass.Stalker] = { nR = 154, nG = 25, nB = 230, nA = 255 },
+      [GameLib.CodeEnumClass.Spellslinger] = { nR = 87, nG = 156, nB = 12, nA = 255 }
     }
   }
 }

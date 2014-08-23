@@ -118,25 +118,27 @@ function Main:CreateBar(wndParent, tEntry)
 end
 
 function Main:GetColorForEntry(tEntry)
-  local sColor = nil
+  local tColor = nil
+
+  local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
 
   -- Determine the color of the bar based on user settings.
   if Threat.tOptions.tCharacter.bUseClassColors then
     -- Use class color. Defaults to white if not found.
-    sColor = Threat.tOptions.tCharacter.tColors[tEntry.eClass] or "ffffffff"
+    tColor = Threat.tOptions.tCharacter.tColors[tEntry.eClass] or tWhite
   else
     -- Use non-class colors. Defaults to white if not found.
     local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
-      sColor = Threat.tOptions.tCharacter.tColors.sSelf or "ffffffff"
+      tColor = Threat.tOptions.tCharacter.tColors.sSelf or tWhite
     else
       -- This unit is not the player.
-      sColor = Threat.tOptions.tCharacter.tColors.sOthers or "ffffffff"
+      tColor = Threat.tOptions.tCharacter.tColors.sOthers or tWhite
     end
   end
 
-  return ApolloColor.new(sColor)
+  return ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tColor.nA / 255)
 end
 
 function Main.SortBars(wndBar1, wndBar2)
