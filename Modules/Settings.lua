@@ -28,6 +28,7 @@ end
 
 function Settings:OnBtnLock(oHandler, wndControl)
   Threat.tOptions.tCharacter.bLock = wndControl:IsChecked()
+  Threat:GetModule("Main"):UpdateLockStatus()
 end
 
 function Settings:OnBtnClassColors(oHandler, wndControl)
@@ -67,10 +68,12 @@ end
 
 function Settings:Open()
   self.wndMain:Show(true)
+  Threat:GetModule("Main").wndMain:FindChild("Background"):Show(true)
 end
 
 function Settings:Close()
   self.wndMain:Show(false)
+  Threat:GetModule("Main").wndMain:FindChild("Background"):Show(false)
 end
 
 function Settings:ApplyCurrent()

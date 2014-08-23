@@ -47,11 +47,15 @@ end
 
 function Main:OnDocumentReady()
   self.wndMain = Apollo.LoadForm(self.oXml, "Threat", nil, self)
+  self.wndMain:AddEventHandler("MouseEnter", "OnMouseEnter")
+  self.wndMain:AddEventHandler("MouseExit", "OnMouseExit")
+  self:UpdateLockStatus()
 end
 
 function Main:OnTargetThreatListUpdated(...)
   self.tThreatList = {}
   self.nTotal = 0
+  self.nLastEvent = os.time()
 
   -- Create the new threat list
   for nId = 1, select("#", ...), 2 do
@@ -65,8 +69,6 @@ function Main:OnTargetThreatListUpdated(...)
     })
     self.nTotal = self.nTotal + nValue
   end
-
-  self.nLastEvent = os.time()
 end
 
 function Main:OnCombatTimer()
@@ -90,6 +92,18 @@ function Main:OnUpdateTimer()
       self:CreateBar(wndList, tEntry)
     end
     wndList:ArrangeChildrenVert(0, Main.SortBars)
+  end
+end
+
+function Main:OnMouseEnter()
+  if not Threat.tOptions.tCharacter.bLock then
+    self.wndMain:FindChild("Background"):Show(true)
+  end
+end
+
+function Main:OnMouseExit()
+  if not Threat:GetModule("Settings").wndMain:IsShown() then
+    self.wndMain:FindChild("Background"):Show(false)
   end
 end
 
@@ -139,6 +153,14 @@ function Main:GetColorForEntry(tEntry)
   end
 
   return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
+end
+
+function Main:UpdateLockStatus()
+  if Threat.tOptions.tCharacter.bLock then
+    self.wndMain:RemoveStyle("Moveable")
+  else
+    self.wndMain:AddStyle("Moveable")
+  end
 end
 
 function Main.SortBars(wndBar1, wndBar2)
