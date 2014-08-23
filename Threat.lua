@@ -13,6 +13,20 @@ Threat.tDefaults = {
   tAccount = {
   },
   tCharacter = {
+    nCombatDelay = 5,
+    bUseClassColors = false,
+    tNonClassColors = {
+      sSelf = "579c0cff",
+      sOthers = "0d8fd3ff"
+    },
+    tClassColors = {
+      [GameLib.CodeEnumClass.Warrior] = "eb1b1bff",
+      [GameLib.CodeEnumClass.Engineer] = "e18c20ff",
+      [GameLib.CodeEnumClass.Esper] = "0d8fd3ff",
+      [GameLib.CodeEnumClass.Medic] = "e9c024ff",
+      [GameLib.CodeEnumClass.Stalker] = "9a19e6ff",
+      [GameLib.CodeEnumClass.Spellslinger] = "579c0cff"
+    }
   }
 }
 
