@@ -55,8 +55,6 @@ end
 
 function Main:OnDocumentReady()
   self.wndMain = Apollo.LoadForm(self.oXml, "Threat", nil, self)
-  self.wndMain:AddEventHandler("MouseEnter", "OnMouseEnter")
-  self.wndMain:AddEventHandler("MouseExit", "OnMouseExit")
   self:UpdateLockStatus()
 
   local nLeft = Threat.tOptions.tCharacter.tPosition.nX
