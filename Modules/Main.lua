@@ -185,11 +185,8 @@ function Main:GetColorForEntry(tEntry)
 end
 
 function Main:UpdateLockStatus()
-  if Threat.tOptions.tCharacter.bLock then
-    self.wndMain:RemoveStyle("Moveable")
-  else
-    self.wndMain:AddStyle("Moveable")
-  end
+  self.wndMain:SetStyle("Moveable", not Threat.tOptions.tCharacter.bLock)
+  self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.tCharacter.bLock)
 end
 
 function Main:ShowTestBars()
