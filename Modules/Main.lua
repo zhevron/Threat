@@ -112,14 +112,14 @@ function Main:CreateBar(wndParent, tEntry)
   wndBar:FindChild("Total"):SetData(tEntry.nValue)
 
   -- Update the progress bar with the new values and set the bar color.
-  wndBar:FindChild("Progress"):SetMax(self.nTotal)
-  wndBar:FindChild("Progress"):SetProgress(tEntry.nValue)
-  wndBar:FindChild("Progress"):SetBarColor(self:GetColorForEntry(tEntry))
+  local nR, nG, nB, nA = self:GetColorForEntry(tEntry)
+  local nLeft, nTop, _, nBottom = wndBar:FindChild("Background"):GetAnchorPoints()
+  wndBar:FindChild("Background"):SetAnchorPoints(nLeft, nTop, nPercent / 100, nBottom)
+  wndBar:FindChild("Background"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 end
 
 function Main:GetColorForEntry(tEntry)
   local tColor = nil
-
   local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
 
   -- Determine the color of the bar based on user settings.
@@ -138,7 +138,7 @@ function Main:GetColorForEntry(tEntry)
     end
   end
 
-  return ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tColor.nA / 255)
+  return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
 end
 
 function Main.SortBars(wndBar1, wndBar2)
