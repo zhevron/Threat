@@ -52,6 +52,7 @@ function Threat:OnInterfaceMenuListHasLoaded()
 end
 
 function Threat:OnConfigure()
+  self:GetModule("Settings"):Open()
 end
 
 function Threat:OnSave(eType)
