@@ -92,7 +92,7 @@ function Main:OnUpdateTimer()
   local wndList = self.wndMain:FindChild("BarList")
   wndList:DestroyChildren()
 
-  if self.nTotal >= 0 then
+  if self.nTotal >= 0 and #self.tThreatList > 1 then
     for _, tEntry in pairs(self.tThreatList) do
       self:CreateBar(wndList, tEntry)
     end
