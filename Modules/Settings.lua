@@ -26,6 +26,15 @@ function Settings:OnDocumentReady()
   self:ApplyCurrent()
 end
 
+function Settings:OnBtnEnable(oHandler, wndControl)
+  Threat.tOptions.tCharacter.bEnabled = wndControl:IsChecked()
+  if wndControl:IsChecked() then
+    Threat:GetModule("Main"):Enable()
+  else
+    Threat:GetModule("Main"):Disable()
+  end
+end
+
 function Settings:OnBtnLock(oHandler, wndControl)
   Threat.tOptions.tCharacter.bLock = wndControl:IsChecked()
   Threat:GetModule("Main"):UpdateLockStatus()
@@ -77,6 +86,7 @@ function Settings:Close()
 end
 
 function Settings:ApplyCurrent()
+  self.wndMain:FindChild("BtnEnable"):SetCheck(Threat.tOptions.tCharacter.bEnabled)
   self.wndMain:FindChild("BtnLock"):SetCheck(Threat.tOptions.tCharacter.bLock)
   self.wndMain:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.tCharacter.bUseClassColors)
   self:CreateColors()

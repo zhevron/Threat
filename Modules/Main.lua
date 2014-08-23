@@ -30,8 +30,16 @@ end
 function Main:OnEnable()
   Apollo.RegisterEventHandler("TargetThreatListUpdated", "OnTargetThreatListUpdated", self)
 
+  if self.wndMain ~= nil then
+    self.wndMain:Show(true)
+  end
+
   self.tCombatTimer:Start()
   self.tUpdateTimer:Start()
+
+  if not Threat.tOptions.tCharacter.bEnabled then
+    self:Disable()
+  end
 end
 
 function Main:OnDisable()

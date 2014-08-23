@@ -13,6 +13,7 @@ Threat.tDefaults = {
   tAccount = {
   },
   tCharacter = {
+    bEnabled = true,
     bLock = false,
     tPosition = {
       nX = 100,
@@ -43,6 +44,7 @@ function Threat:OnInitialize()
     appender = "GeminiConsole"
   })
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
+  Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end
 
 function Threat:OnEnable()
@@ -56,6 +58,16 @@ end
 
 function Threat:OnConfigure()
   self:GetModule("Settings"):Open()
+end
+
+function Threat:OnSlashCommand()
+  local Main = self:GetModule("Main")
+  self.tOptions.tCharacter.bEnabled = not Main:IsEnabled()
+  if Main:IsEnabled() then
+    Main:Disable()
+  else
+    Main:Enable()
+  end
 end
 
 function Threat:OnSave(eType)
