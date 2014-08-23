@@ -35,7 +35,7 @@ function Settings:OnBtnClassColors(oHandler, wndControl)
 end
 
 function Settings:OnBtnReset(oHandler, wndControl)
-  Threat:GetModule("Utility"):TableCopyRecursive(Threat.tDefaults, Threat.tOptions)
+  Threat.tOptions = Threat:GetModule("Utility"):TableCopyRecursive(Threat.tDefaults)
   self:ApplyCurrent()
 end
 

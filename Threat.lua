@@ -33,7 +33,7 @@ Threat.tDefaults = {
   }
 }
 
-Threat.tOptions = Threat.tDefaults
+Threat.tOptions = {}
 
 function Threat:OnInitialize()
   local GeminiLogging = Apollo.GetPackage("Gemini:Logging-1.2").tPackage
@@ -76,13 +76,13 @@ function Threat:OnRestore(eType, tOptions)
         tOptions[oKey] = oVal
       end
     end
-    self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions, self.tOptions.tCharacter)
+    self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions)
   elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
     for oKey, oVal in pairs(self.tDefaults.tAccount) do
       if tOptions[oKey] == nil then
         tOptions[oKey] = oVal
       end
     end
-    self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions, self.tOptions.tAccount)
+    self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions)
   end
 end
