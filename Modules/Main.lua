@@ -124,7 +124,7 @@ end
 
 function Main:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
   if eMouseButton == GameLib.CodeEnumInputMouse.Right then
-    if not Threat.tOptions.tCharacter.tLock then
+    if not Threat.tOptions.tCharacter.bLock then
       Threat:GetModule("Settings"):Open()
     end
   end
