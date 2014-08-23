@@ -15,4 +15,5 @@
   <!-- Locales -->
 
   <!-- Forms -->
+  <Form Name="Forms/Main.xml"/>
 </Addon>

@@ -1,3 +1,6 @@
+require "Apollo"
+require "GameLib"
+
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat", true)
 
 Threat.tVersion = {
@@ -16,6 +19,12 @@ Threat.tDefaults = {
 Threat.tOptions = Threat.tDefaults
 
 function Threat:OnInitialize()
+  local GeminiLogging = Apollo.GetPackage("Gemini:Logging-1.2").tPackage
+  self.Log = GeminiLogging:GetLogger({
+    level = GeminiLogging.INFO,
+    pattern = "[%d %l %c:%n] %m",
+    appender = "GeminiConsole"
+  })
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
 end
 
