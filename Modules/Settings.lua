@@ -44,6 +44,10 @@ function Settings:OnBtnClassColors(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bUseClassColors = wndControl:IsChecked()
 end
 
+function Settings:OnBtnShowSolo(wndHandler, wndControl)
+  Threat.tOptions.tCharacter.bShowSolo = wndControl:IsChecked()
+end
+
 function Settings:OnBtnReset(wndHandler, wndControl)
   Threat.tOptions = Threat:GetModule("Utility"):TableCopyRecursive(Threat.tDefaults)
   self:ApplyCurrent()

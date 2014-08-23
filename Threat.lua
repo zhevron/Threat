@@ -14,6 +14,7 @@ Threat.tDefaults = {
   },
   tCharacter = {
     bEnabled = true,
+    bShowSolo = false,
     bLock = false,
     tPosition = {
       nX = 100,
