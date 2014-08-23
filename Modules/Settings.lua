@@ -53,6 +53,10 @@ function Settings:OnBtnReset(wndHandler, wndControl)
   self:ApplyCurrent()
 end
 
+function Settings:OnBtnTest(wndHandler, wndControl)
+  Threat:GetModule("Main"):ShowTestBars()
+end
+
 function Settings:OnBtnChoose(wndHandler, wndControl)
   local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   local tColor = Threat.tOptions.tCharacter.tColors[wndControl:GetParent():GetData()]

@@ -33,6 +33,9 @@
             <Control Class="Button" Base="BK3:btnHolo_Blue_Med" Font="DefaultButton" ButtonType="PushButton" RadioGroup="" LAnchorPoint="1" LAnchorOffset="-385" TAnchorPoint="0" TAnchorOffset="-13" RAnchorPoint="1" RAnchorOffset="-185" BAnchorPoint="1" BAnchorOffset="10" DT_VCENTER="1" DT_CENTER="1" BGColor="UI_BtnBGDefault" TextColor="UI_BtnTextDefault" NormalTextColor="UI_BtnTextDefault" PressedTextColor="UI_BtnTextDefault" FlybyTextColor="UI_BtnTextDefault" PressedFlybyTextColor="UI_BtnTextDefault" DisabledTextColor="UI_BtnTextDefault" TooltipType="OnCursor" Name="BtnReset" TooltipColor="" Text="Reset to Default" TextId="">
                 <Event Name="ButtonSignal" Function="OnBtnReset"/>
             </Control>
+            <Control Class="Button" Base="BK3:btnHolo_Blue_Med" Font="DefaultButton" ButtonType="PushButton" RadioGroup="" LAnchorPoint="1" LAnchorOffset="-570" TAnchorPoint="0" TAnchorOffset="-13" RAnchorPoint="1" RAnchorOffset="-370" BAnchorPoint="1" BAnchorOffset="10" DT_VCENTER="1" DT_CENTER="1" BGColor="UI_BtnBGDefault" TextColor="UI_BtnTextDefault" NormalTextColor="UI_BtnTextDefault" PressedTextColor="UI_BtnTextDefault" FlybyTextColor="UI_BtnTextDefault" PressedFlybyTextColor="UI_BtnTextDefault" DisabledTextColor="UI_BtnTextDefault" TooltipType="OnCursor" Name="BtnTest" TooltipColor="" Text="Show Test Bars" TextId="">
+                <Event Name="ButtonSignal" Function="OnBtnTest"/>
+            </Control>
         </Control>
     </Form>
     <Form Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="1" RAnchorOffset="0" BAnchorPoint="0" BAnchorOffset="34" RelativeToClient="1" Font="Default" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="Color" Border="1" Picture="1" SwallowMouseClicks="1" Moveable="1" Escapable="1" Overlapped="1" TooltipColor="" Tooltip="">

@@ -84,6 +84,7 @@ end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.tCharacter.nCombatDelay) then
+    self.wndMain:FindChild("BarList"):DestroyChildren()
     self.nDuration = 0
   else
     self.nDuration = self.nDuration + 1
@@ -95,14 +96,13 @@ function Main:OnUpdateTimer()
     return
   end
 
-  local wndList = self.wndMain:FindChild("BarList")
-  wndList:DestroyChildren()
-
   if not Threat.tOptions.tCharacter.bShowSolo and #self.tThreatList < 2 then
     return
   end
 
+  local wndList = self.wndMain:FindChild("BarList")
   if self.nTotal >= 0 then
+    wndList:DestroyChildren()
     for _, tEntry in pairs(self.tThreatList) do
       self:CreateBar(wndList, tEntry)
     end
@@ -192,8 +192,62 @@ function Main:UpdateLockStatus()
   end
 end
 
+function Main:ShowTestBars()
+  local tEntries = {
+    {
+      nId = 0,
+      sName = GameLib.GetClassName(GameLib.CodeEnumClass.Warrior),
+      eClass = GameLib.CodeEnumClass.Warrior,
+      nValue = 1000000
+    },
+    {
+      nId = 0,
+      sName = GameLib.GetClassName(GameLib.CodeEnumClass.Engineer),
+      eClass = GameLib.CodeEnumClass.Engineer,
+      nValue = 900000
+    },
+    {
+      nId = 0,
+      sName = GameLib.GetClassName(GameLib.CodeEnumClass.Esper),
+      eClass = GameLib.CodeEnumClass.Esper,
+      nValue = 800000
+    },
+    {
+      nId = 0,
+      sName = GameLib.GetClassName(GameLib.CodeEnumClass.Medic),
+      eClass = GameLib.CodeEnumClass.Medic,
+      nValue = 700000
+    },
+    {
+      nId = GameLib.GetPlayerUnit():GetId(),
+      sName = GameLib.GetClassName(GameLib.CodeEnumClass.Spellslinger),
+      eClass = GameLib.CodeEnumClass.Spellslinger,
+      nValue = 600000
+    },
+    {
+      nId = 0,
+      sName = GameLib.GetClassName(GameLib.CodeEnumClass.Stalker),
+      eClass = GameLib.CodeEnumClass.Stalker,
+      nValue = 500000
+    }
+  }
+
+  local wndList = self.wndMain:FindChild("BarList")
+  wndList:DestroyChildren()
+
+  self.nDuration = 10
+  self.nTotal = 0
+  for _, tEntry in pairs(tEntries) do
+    self.nTotal = self.nTotal + tEntry.nValue
+    self:CreateBar(wndList, tEntry)
+  end
+  wndList:ArrangeChildrenVert(0, Main.SortBars)
+
+  self.nLastEvent = os.time() + 10
+end
+
 function Main.SortBars(wndBar1, wndBar2)
   local nValue1 = wndBar1:FindChild("Total"):GetData()
   local nValue2 = wndBar2:FindChild("Total"):GetData()
-  return nValue1 <= nValue2
+  return nValue1 >= nValue2
 end
