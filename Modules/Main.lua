@@ -50,6 +50,11 @@ function Main:OnDocumentReady()
   self.wndMain:AddEventHandler("MouseEnter", "OnMouseEnter")
   self.wndMain:AddEventHandler("MouseExit", "OnMouseExit")
   self:UpdateLockStatus()
+
+  local nLeft = Threat.tOptions.tCharacter.tPosition.nX
+  local nTop = Threat.tOptions.tCharacter.tPosition.nY
+  local _, _, nRight, nBottom = self.wndMain:GetAnchorOffsets()
+  self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nRight, nTop + nBottom)
 end
 
 function Main:OnTargetThreatListUpdated(...)
@@ -105,6 +110,12 @@ function Main:OnMouseExit()
   if not Threat:GetModule("Settings").wndMain:IsShown() then
     self.wndMain:FindChild("Background"):Show(false)
   end
+end
+
+function Main:OnWindowMove()
+  local nLeft, nTop = self.wndMain:GetAnchorOffsets()
+  Threat.tOptions.tCharacter.tPosition.nX = nLeft
+  Threat.tOptions.tCharacter.tPosition.nY = nTop
 end
 
 function Main:CreateBar(wndParent, tEntry)
