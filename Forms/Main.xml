@@ -7,6 +7,7 @@
         <Event Name="MouseExit" Function="OnMouseExit"/>
         <Event Name="WindowMove" Function="OnWindowMove"/>
         <Event Name="WindowClosed" Function="Close"/>
+        <Event Name="MouseButtonUp" Function="OnMouseButtonUp"/>
     </Form>
     <Form Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="1" RAnchorOffset="0" BAnchorPoint="0" BAnchorOffset="25" RelativeToClient="1" Font="Default" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="Bar" Border="1" Picture="1" SwallowMouseClicks="1" Moveable="0" Escapable="0" Overlapped="1" TooltipColor="" IgnoreMouse="1" Tooltip="">
         <Control Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="1" RAnchorOffset="0" BAnchorPoint="1" BAnchorOffset="0" RelativeToClient="1" Font="Default" Text="" BGColor="black" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="Background" TooltipColor="" Sprite="BasicSprites:WhiteFill" Tooltip="" Picture="1" IgnoreMouse="1"/>

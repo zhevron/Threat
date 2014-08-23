@@ -26,7 +26,7 @@ function Settings:OnDocumentReady()
   self:ApplyCurrent()
 end
 
-function Settings:OnBtnEnable(oHandler, wndControl)
+function Settings:OnBtnEnable(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bEnabled = wndControl:IsChecked()
   if wndControl:IsChecked() then
     Threat:GetModule("Main"):Enable()
@@ -35,21 +35,21 @@ function Settings:OnBtnEnable(oHandler, wndControl)
   end
 end
 
-function Settings:OnBtnLock(oHandler, wndControl)
+function Settings:OnBtnLock(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bLock = wndControl:IsChecked()
   Threat:GetModule("Main"):UpdateLockStatus()
 end
 
-function Settings:OnBtnClassColors(oHandler, wndControl)
+function Settings:OnBtnClassColors(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bUseClassColors = wndControl:IsChecked()
 end
 
-function Settings:OnBtnReset(oHandler, wndControl)
+function Settings:OnBtnReset(wndHandler, wndControl)
   Threat.tOptions = Threat:GetModule("Utility"):TableCopyRecursive(Threat.tDefaults)
   self:ApplyCurrent()
 end
 
-function Settings:OnBtnChoose(oHandler, wndControl)
+function Settings:OnBtnChoose(wndHandler, wndControl)
   local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
   local tColor = Threat.tOptions.tCharacter.tColors[wndControl:GetParent():GetData()]
   if tColor ~= nil then

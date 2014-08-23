@@ -118,6 +118,14 @@ function Main:OnMouseExit()
   end
 end
 
+function Main:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
+  if eMouseButton == GameLib.CodeEnumInputMouse.Right then
+    if not Threat.tOptions.tCharacter.tLock then
+      Threat:GetModule("Settings"):Open()
+    end
+  end
+end
+
 function Main:OnWindowMove()
   local nLeft, nTop = self.wndMain:GetAnchorOffsets()
   Threat.tOptions.tCharacter.tPosition.nX = nLeft
