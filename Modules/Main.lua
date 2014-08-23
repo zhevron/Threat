@@ -35,6 +35,8 @@ function Main:OnEnable()
 end
 
 function Main:OnDisable()
+  Apollo.RemoveEventHandler("TargetThreatListUpdated", self)
+
   if self.wndMain ~= nil then
     self.wndMain:Show(false)
   end
