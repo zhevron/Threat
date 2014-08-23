@@ -13,13 +13,16 @@ Threat.tDefaults = {
   tAccount = {
   },
   tCharacter = {
+    bLock = false,
+    tPosition = {
+      nX = 100,
+      nY = 100
+    },
     nCombatDelay = 5,
     bUseClassColors = false,
-    tNonClassColors = {
+    tColors = {
       sSelf = "579c0cff",
-      sOthers = "0d8fd3ff"
-    },
-    tClassColors = {
+      sOthers = "0d8fd3ff",
       [GameLib.CodeEnumClass.Warrior] = "eb1b1bff",
       [GameLib.CodeEnumClass.Engineer] = "e18c20ff",
       [GameLib.CodeEnumClass.Esper] = "0d8fd3ff",
@@ -68,16 +71,16 @@ end
 function Threat:OnRestore(eType, tOptions)
   local Utility = self:GetModule("Utility")
   if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    for key, val in pairs(self.tDefaults.tCharacter) do
-      if tOptions[key] == nil then
-        tOptions[key] = val
+    for oKey, oVal in pairs(self.tDefaults.tCharacter) do
+      if tOptions[oKey] == nil then
+        tOptions[oKey] = oVal
       end
     end
     self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions, self.tOptions.tCharacter)
   elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    for key, val in pairs(self.tDefaults.tAccount) do
-      if tOptions[key] == nil then
-        tOptions[key] = val
+    for oKey, oVal in pairs(self.tDefaults.tAccount) do
+      if tOptions[oKey] == nil then
+        tOptions[oKey] = oVal
       end
     end
     self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions, self.tOptions.tAccount)

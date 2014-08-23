@@ -123,16 +123,16 @@ function Main:GetColorForEntry(tEntry)
   -- Determine the color of the bar based on user settings.
   if Threat.tOptions.tCharacter.bUseClassColors then
     -- Use class color. Defaults to white if not found.
-    sColor = Threat.tOptions.tCharacter.tClassColors[tEntry.eClass] or "ffffffff"
+    sColor = Threat.tOptions.tCharacter.tColors[tEntry.eClass] or "ffffffff"
   else
     -- Use non-class colors. Defaults to white if not found.
     local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
-      sColor = Threat.tOptions.tCharacter.tNonClassColors.sSelf or "ffffffff"
+      sColor = Threat.tOptions.tCharacter.tColors.sSelf or "ffffffff"
     else
       -- This unit is not the player.
-      sColor = Threat.tOptions.tCharacter.tNonClassColors.sOthers or "ffffffff"
+      sColor = Threat.tOptions.tCharacter.tColors.sOthers or "ffffffff"
     end
   end
 
