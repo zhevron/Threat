@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Addon Author="Zhevron" APIVersion="9" Name="Threat" Description="A threat meter. Use it.">
+  <!-- Libs -->
+  <Script Name="Libs/GeminiAddon/GeminiAddon.lua"/>
+  <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
+  <Script Name="Libs/GeminiLogging/GeminiLogging.lua"/>
+
+  <!-- Main -->
+  <Script Name="Threat.lua"/>
+
+  <!-- Modules -->
+  <Script Name="Modules/Main.lua"/>
+  <Script Name="Modules/Utility.lua"/>
+
+  <!-- Locales -->
+
+  <!-- Forms -->
+</Addon>

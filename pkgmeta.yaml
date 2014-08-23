@@ -1,0 +1,18 @@
+package-as: Threat
+enable-nolib-creation: no
+
+externals:
+  Libs/GeminiAddon:
+    url: https://github.com/wildstarnasa/GeminiAddon.git
+    tag: 1.1.5
+  Libs/GeminiColor:
+    url: https://github.com/wildstarnasa/GeminiColor.git
+    tag: latest
+  Libs/GeminiLogging:
+    url: https://github.com/wildstarnasa/GeminiLogging.git
+    tag: latest
+
+ignore:
+  - README.md
+
+license-output: LICENSE.txt
