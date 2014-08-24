@@ -14,12 +14,15 @@ function Utility:FormatNumber(nNumber, nPrecision)
   end
 end
 
-function Utility:TableCopyRecursive(tSource)
+function Utility:TableCopyRecursive(tSource, tDestination)
   if type(tSource) ~= "table" then
     return
   end
   local tMetatable = getmetatable(tSource)
-  local tDestination = {}
+  local tDestination = tDestination or {}
+  if type(tDestination) ~= "table" then
+    return
+  end
   for oKey, oValue in pairs(tSource) do
     if type(oValue) == "table" then
       oValue = self:TableCopyRecursive(oValue)

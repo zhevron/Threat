@@ -39,15 +39,31 @@ Threat.tDefaults = {
   }
 }
 
-Threat.tOptions = {}
+Threat.tOptions = {
+  tAccount = {},
+  tCharacter = {}
+}
 
 function Threat:OnInitialize()
-  local GeminiLogging = Apollo.GetPackage("Gemini:Logging-1.2").tPackage
-  self.Log = GeminiLogging:GetLogger({
-    level = GeminiLogging.INFO,
-    pattern = "[%d %l %c:%n] %m",
-    appender = "GeminiConsole"
-  })
+  local Utility = self:GetModule("Utility")
+  for oKey, oValue in pairs(self.tDefaults.tCharacter) do
+    if self.tOptions.tCharacter[oKey] == nil then
+      if type(oValue) ~= "table" then
+        self.tOptions.tCharacter[oKey] = oValue
+      else
+        self.tOptions.tCharacter[oKey] = Utility:TableCopyRecursive(oValue)
+      end
+    end
+  end
+  for oKey, oValue in pairs(self.tDefaults.tAccount) do
+    if self.tOptions.tAccount[oKey] == nil then
+      if type(oValue) ~= "table" then
+        self.tOptions.tAccount[oKey] = oValue
+      else
+        self.tOptions.tAccount[oKey] = Utility:TableCopyRecursive(oValue)
+      end
+    end
+  end
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
   Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end
@@ -78,9 +94,9 @@ end
 function Threat:OnSave(eType)
   local Utility = self:GetModule("Utility")
   if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    return Utility:TableCopyRecursive(self.tOptions.tCharacter)
+    return Utility:TableCopyRecursive(self.tOptions.tCharacter, self.tOptions)
   elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    return Utility:TableCopyRecursive(self.tOptions.tAccount)
+    return Utility:TableCopyRecursive(self.tOptions.tAccount, self.tOptions)
   end
   return nil
 end
@@ -88,18 +104,8 @@ end
 function Threat:OnRestore(eType, tOptions)
   local Utility = self:GetModule("Utility")
   if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    for oKey, oVal in pairs(self.tDefaults.tCharacter) do
-      if tOptions[oKey] == nil then
-        tOptions[oKey] = oVal
-      end
-    end
     self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions)
   elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    for oKey, oVal in pairs(self.tDefaults.tAccount) do
-      if tOptions[oKey] == nil then
-        tOptions[oKey] = oVal
-      end
-    end
     self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions)
   end
 end

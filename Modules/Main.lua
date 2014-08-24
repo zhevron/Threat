@@ -1,6 +1,7 @@
 require "Apollo"
 require "ApolloTimer"
 require "GameLib"
+require "GroupLib"
 
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Main = Threat:NewModule("Main")
