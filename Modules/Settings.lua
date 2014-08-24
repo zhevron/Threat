@@ -47,6 +47,10 @@ function Settings:OnBtnClassColors(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bUseClassColors = wndControl:IsChecked()
 end
 
+function Settings:OnBtnRoleColors(wndHandler, wndControl)
+  Threat.tOptions.tCharacter.bUseRoleColors = wndControl:IsChecked()
+end
+
 function Settings:OnBtnShowSolo(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bShowSolo = wndControl:IsChecked()
 end
@@ -100,6 +104,7 @@ function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnEnable"):SetCheck(Threat.tOptions.tCharacter.bEnabled)
   self.wndMain:FindChild("BtnLock"):SetCheck(Threat.tOptions.tCharacter.bLock)
   self.wndMain:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.tCharacter.bUseClassColors)
+  self.wndMain:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.tCharacter.bUseRoleColors)
   self:CreateColors()
 end
 
@@ -109,8 +114,8 @@ function Settings:CreateColors()
   wndList:DestroyChildren()
 
   local wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
-  local tColor = Threat.tOptions.tCharacter.tColors.sSelf
-  wndColor:SetData("sSelf")
+  local tColor = Threat.tOptions.tCharacter.tColors.tSelf
+  wndColor:SetData("tSelf")
   wndColor:FindChild("Name"):SetText(L["self"])
   wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
     tColor.nR / 255,
@@ -120,8 +125,8 @@ function Settings:CreateColors()
   ))
 
   wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
-  tColor = Threat.tOptions.tCharacter.tColors.sOthers
-  wndColor:SetData("sOthers")
+  tColor = Threat.tOptions.tCharacter.tColors.tOthers
+  wndColor:SetData("tOthers")
   wndColor:FindChild("Name"):SetText(L["others"])
   wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
     tColor.nR / 255,
@@ -129,6 +134,43 @@ function Settings:CreateColors()
     tColor.nB / 255,
     tColor.nA / 255
   ))
+
+  Apollo.LoadForm(self.oXml, "Divider", wndList, self)
+
+  wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
+  tColor = Threat.tOptions.tCharacter.tColors.tTank
+  wndColor:SetData("tTank")
+  wndColor:FindChild("Name"):SetText(Apollo.GetString("Matching_Role_Tank"))
+  wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+    tColor.nR / 255,
+    tColor.nG / 255,
+    tColor.nB / 255,
+    tColor.nA / 255
+  ))
+
+  wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
+  tColor = Threat.tOptions.tCharacter.tColors.tHealer
+  wndColor:SetData("tHealer")
+  wndColor:FindChild("Name"):SetText(Apollo.GetString("Matching_Role_Healer"))
+  wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+    tColor.nR / 255,
+    tColor.nG / 255,
+    tColor.nB / 255,
+    tColor.nA / 255
+  ))
+
+  wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
+  tColor = Threat.tOptions.tCharacter.tColors.tDamage
+  wndColor:SetData("tDamage")
+  wndColor:FindChild("Name"):SetText(Apollo.GetString("Matching_Role_Dps"))
+  wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+    tColor.nR / 255,
+    tColor.nG / 255,
+    tColor.nB / 255,
+    tColor.nA / 255
+  ))
+
+  Apollo.LoadForm(self.oXml, "Divider", wndList, self)
 
   for eClass, tColor in pairs(Threat.tOptions.tCharacter.tColors) do
     if type(eClass) == "number" then

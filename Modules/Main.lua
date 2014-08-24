@@ -169,15 +169,29 @@ function Main:GetColorForEntry(tEntry)
   if Threat.tOptions.tCharacter.bUseClassColors then
     -- Use class color. Defaults to white if not found.
     tColor = Threat.tOptions.tCharacter.tColors[tEntry.eClass] or tWhite
+  elseif Threat.tOptions.tCharacter.bUseRoleColors and GroupLib.InGroup() then
+    -- Use role color. Defaults to white if not found.
+    for nIdx = 1, GroupLib.GetMemberCount() do
+      local tMemberData = GroupLib.GetGroupMember(nIdx)
+      if tMemberData.strCharacterName == tEntry.sName then
+        if tMemberData.bTank then
+          tColor = Threat.tOptions.tCharacter.tColors.tTank or tWhite
+        elseif tMemberData.bHealer then
+          tColor = Threat.tOptions.tCharacter.tColors.tHealer or tWhite
+        else
+          tColors = Threat.tOptions.tCharacter.tColors.tDamage or tWhite
+        end
+      end
+    end
   else
     -- Use non-class colors. Defaults to white if not found.
     local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
-      tColor = Threat.tOptions.tCharacter.tColors.sSelf or tWhite
+      tColor = Threat.tOptions.tCharacter.tColors.tSelf or tWhite
     else
       -- This unit is not the player.
-      tColor = Threat.tOptions.tCharacter.tColors.sOthers or tWhite
+      tColor = Threat.tOptions.tCharacter.tColors.tOthers or tWhite
     end
   end
 
