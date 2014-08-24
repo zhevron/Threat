@@ -145,6 +145,17 @@ function Settings:CreateColors()
     tColor.nA / 255
   ))
 
+  wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
+  tColor = Threat.tOptions.tCharacter.tColors.tPet
+  wndColor:SetData("tPet")
+  wndColor:FindChild("Name"):SetText(L["pet"])
+  wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+    tColor.nR / 255,
+    tColor.nG / 255,
+    tColor.nB / 255,
+    tColor.nA / 255
+  ))
+
   Apollo.LoadForm(self.oXml, "Divider", wndList, self)
 
   wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)

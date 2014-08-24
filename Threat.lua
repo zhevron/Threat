@@ -31,6 +31,7 @@ Threat.tDefaults = {
     tColors = {
       tSelf = { nR = 87, nG = 156, nB = 12, nA = 255 },
       tOthers = { nR = 13, nG = 143, nB = 211, nA = 255 },
+      tPet = { nR = 47, nG = 79, nB = 79, nA = 255 },
       tTank = { nR = 154, nG = 25, nB = 230, nA = 255 },
       tHealer = { nR = 87, nG = 156, nB = 12, nA = 255 },
       tDamage = { nR = 235, nG = 27, nB = 27, nA = 255 },
@@ -51,24 +52,8 @@ Threat.tOptions = {
 
 function Threat:OnInitialize()
   local Utility = self:GetModule("Utility")
-  for oKey, oValue in pairs(self.tDefaults.tCharacter) do
-    if self.tOptions.tCharacter[oKey] == nil then
-      if type(oValue) ~= "table" then
-        self.tOptions.tCharacter[oKey] = oValue
-      else
-        self.tOptions.tCharacter[oKey] = Utility:TableCopyRecursive(oValue)
-      end
-    end
-  end
-  for oKey, oValue in pairs(self.tDefaults.tAccount) do
-    if self.tOptions.tAccount[oKey] == nil then
-      if type(oValue) ~= "table" then
-        self.tOptions.tAccount[oKey] = oValue
-      else
-        self.tOptions.tAccount[oKey] = Utility:TableCopyRecursive(oValue)
-      end
-    end
-  end
+  self.tOptions.tCharacter = Utility:TableCopyRecursive(self.tDefaults.tCharacter)
+  self.tOptions.tAccount = Utility:TableCopyRecursive(self.tDefaults.tAccount)
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
   Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end

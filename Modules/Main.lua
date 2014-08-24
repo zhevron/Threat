@@ -76,6 +76,7 @@ function Main:OnTargetThreatListUpdated(...)
         nId = oUnit:GetId(),
         sName = oUnit:GetName(),
         eClass = oUnit:GetClassId(),
+        bPet = oUnit:GetUnitOwner() ~= nil,
         nValue = nValue
       })
       self.nTotal = self.nTotal + nValue
@@ -238,6 +239,10 @@ function Main:GetColorForEntry(tEntry)
     end
   end
 
+  if tEntry.bPet then
+    tColor = Threat.tOptions.tCharacter.tColors.tPet or tWhite
+  end
+
   return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
 end
 
@@ -256,42 +261,56 @@ function Main:UpdateLockStatus()
 end
 
 function Main:ShowTestBars()
+  local L = Apollo.GetPackage("Gemini:Locale-1.0").tPackage:GetLocale("Threat", true)
   local tEntries = {
     {
       nId = 0,
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Warrior),
       eClass = GameLib.CodeEnumClass.Warrior,
+      bPet = false,
       nValue = 1000000
     },
     {
       nId = 0,
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Engineer),
       eClass = GameLib.CodeEnumClass.Engineer,
+      bPet = false,
       nValue = 900000
     },
     {
       nId = 0,
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Esper),
       eClass = GameLib.CodeEnumClass.Esper,
+      bPet = false,
       nValue = 800000
     },
     {
       nId = 0,
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Medic),
       eClass = GameLib.CodeEnumClass.Medic,
+      bPet = false,
       nValue = 700000
     },
     {
       nId = GameLib.GetPlayerUnit():GetId(),
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Spellslinger),
       eClass = GameLib.CodeEnumClass.Spellslinger,
+      bPet = false,
       nValue = 600000
     },
     {
       nId = 0,
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Stalker),
       eClass = GameLib.CodeEnumClass.Stalker,
+      bPet = false,
       nValue = 500000
+    },
+    {
+      nId = 0,
+      sName = L["pet"],
+      eClass = nil,
+      bOet = true,
+      nValue = 400000
     }
   }
 
