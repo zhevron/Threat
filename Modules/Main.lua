@@ -157,6 +157,12 @@ function Main:CreateBar(wndParent, tEntry)
   local nPercent = (tEntry.nValue / self.nTotal) * 100
   local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue, 2)
 
+  -- Show the difference if enabled and not the first bar
+  if #wndParent:GetChildren() > 0 and Threat.tOptions.tCharacter.bShowDifferences then
+    local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
+    sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
+  end
+
   -- Set the name string to the character name
   wndBar:FindChild("Name"):SetText(tEntry.sName)
 

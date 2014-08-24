@@ -55,6 +55,10 @@ function Settings:OnBtnShowSolo(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bShowSolo = wndControl:IsChecked()
 end
 
+function Settings:OnBtnShowDifferences(wndHandler, wndControl)
+  Threat.tOptions.tCharacter.bShowDifferences = wndControl:IsChecked()
+end
+
 function Settings:OnBtnReset(wndHandler, wndControl)
   Threat.tOptions = Threat:GetModule("Utility"):TableCopyRecursive(Threat.tDefaults)
   Threat:GetModule("Main"):UpdatePosition()
@@ -106,6 +110,8 @@ function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnLock"):SetCheck(Threat.tOptions.tCharacter.bLock)
   self.wndMain:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.tCharacter.bUseClassColors)
   self.wndMain:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.tCharacter.bUseRoleColors)
+  self.wndMain:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.tCharacter.bShowSolo)
+  self.wndMain:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.tCharacter.bShowDifferences)
   self:CreateColors()
 end
 
