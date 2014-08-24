@@ -309,7 +309,7 @@ function Main:ShowTestBars()
       nId = 0,
       sName = L["pet"],
       eClass = nil,
-      bOet = true,
+      bPet = true,
       nValue = 400000
     }
   }
