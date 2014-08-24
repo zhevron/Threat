@@ -60,8 +60,9 @@ function Main:OnDocumentReady()
 
   local nLeft = Threat.tOptions.tCharacter.tPosition.nX
   local nTop = Threat.tOptions.tCharacter.tPosition.nY
-  local _, _, nRight, nBottom = self.wndMain:GetAnchorOffsets()
-  self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nRight, nTop + nBottom)
+  local nWidth = Threat.tOptions.tCharacter.tSize.nWidth
+  local nHeight = Threat.tOptions.tCharacter.tSize.nHeight
+  self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
 function Main:OnTargetThreatListUpdated(...)
@@ -137,6 +138,12 @@ function Main:OnWindowMove()
   Threat.tOptions.tCharacter.tPosition.nY = nTop
 end
 
+function Main:OnWindowSizeChanged()
+  local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
+  Threat.tOptions.tCharacter.tSize.nWidth = nRight - nLeft
+  Threat.tOptions.tCharacter.tSize.nHeight = nBottom - nTop
+end
+
 function Main:CreateBar(wndParent, tEntry)
   local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
 
@@ -201,6 +208,7 @@ end
 
 function Main:UpdateLockStatus()
   self.wndMain:SetStyle("Moveable", not Threat.tOptions.tCharacter.bLock)
+  self.wndMain:SetStyle("Sizable", not Threat.tOptions.tCharacter.bLock)
   self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.tCharacter.bLock)
 end
 

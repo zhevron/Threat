@@ -20,6 +20,10 @@ Threat.tDefaults = {
       nX = 100,
       nY = 100
     },
+    tSize = {
+      nWidth = 350,
+      nHeight = 250
+    },
     nCombatDelay = 5,
     bUseClassColors = false,
     bUseRoleColors = false,
