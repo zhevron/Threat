@@ -30,6 +30,7 @@ end
 
 function Main:OnEnable()
   Apollo.RegisterEventHandler("TargetThreatListUpdated", "OnTargetThreatListUpdated", self)
+  Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
 
   if self.wndMain ~= nil then
     self.wndMain:Show(true)
@@ -45,6 +46,7 @@ end
 
 function Main:OnDisable()
   Apollo.RemoveEventHandler("TargetThreatListUpdated", self)
+  Apollo.RemoveEventHandler("TargetUnitChanged", self)
 
   if self.wndMain ~= nil then
     self.wndMain:Show(false)
@@ -77,6 +79,10 @@ function Main:OnTargetThreatListUpdated(...)
     })
     self.nTotal = self.nTotal + nValue
   end
+end
+
+function Main:OnTargetUnitChanged(unitTarget)
+  self.wndMain:FindChild("BarList"):DestroyChildren()
 end
 
 function Main:OnCombatTimer()
