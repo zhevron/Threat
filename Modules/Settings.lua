@@ -26,7 +26,6 @@ function Settings:OnDocumentReady()
   self.wndMain = Apollo.LoadForm(self.oXml, "Settings", nil, self)
   GeminiLocale:TranslateWindow(L, self.wndMain)
   self.wndMain:Show(false)
-  self:ApplyCurrent()
 end
 
 function Settings:OnBtnEnable(wndHandler, wndControl)
@@ -45,9 +44,11 @@ end
 
 function Settings:OnBtnClassColors(wndHandler, wndControl)
   Threat.tOptions.tCharacter.bUseClassColors = wndControl:IsChecked()
+  Threat.tOptions.tCharacter.bUseRoleColors = not wndControl:IsChecked()
 end
 
 function Settings:OnBtnRoleColors(wndHandler, wndControl)
+  Threat.tOptions.tCharacter.bUseClassColors = not wndControl:IsChecked()
   Threat.tOptions.tCharacter.bUseRoleColors = wndControl:IsChecked()
 end
 
@@ -97,6 +98,7 @@ function Settings:OnColorPicker(sColor, wndControl)
 end
 
 function Settings:Open()
+  self:ApplyCurrent()
   self.wndMain:Show(true)
   Threat:GetModule("Main").wndMain:FindChild("Background"):Show(true)
 end
