@@ -98,9 +98,9 @@ end
 function Threat:OnSave(eType)
   local Utility = self:GetModule("Utility")
   if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    return Utility:TableCopyRecursive(self.tOptions.tCharacter, self.tOptions)
+    return Utility:TableCopyRecursive(self.tOptions.tCharacter)
   elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    return Utility:TableCopyRecursive(self.tOptions.tAccount, self.tOptions)
+    return Utility:TableCopyRecursive(self.tOptions.tAccount)
   end
   return nil
 end
@@ -108,8 +108,8 @@ end
 function Threat:OnRestore(eType, tOptions)
   local Utility = self:GetModule("Utility")
   if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions)
+    self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions, self.tOptions.tCharacter)
   elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions)
+    self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions, self.tOptions.tAccount)
   end
 end

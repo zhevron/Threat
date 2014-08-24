@@ -16,10 +16,10 @@ end
 
 function Utility:TableCopyRecursive(tSource, tDestination)
   if type(tSource) ~= "table" then
-    return
+    return {}
   end
   local tMetatable = getmetatable(tSource)
-  local tDestination = tDestination or {}
+  local tDestination = self:TableCopyRecursive(tDestination)
   if type(tDestination) ~= "table" then
     return
   end
