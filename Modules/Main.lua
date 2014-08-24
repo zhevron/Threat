@@ -79,6 +79,13 @@ function Main:OnTargetThreatListUpdated(...)
     })
     self.nTotal = self.nTotal + nValue
   end
+
+  -- Sort the new threat list
+  table.sort(self.tThreatList,
+    function(oValue1, oValue2)
+      return oValue1.nValue < oValue2.nValue
+    end
+  )
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
@@ -110,7 +117,7 @@ function Main:OnUpdateTimer()
 
   if self.nTotal >= 0 and #self.tThreatList > 0 then
     wndList:DestroyChildren()
-    for _, tEntry in pairs(self.tThreatList) do
+    for _, tEntry in ipairs(self.tThreatList) do
       self:CreateBar(wndList, tEntry)
     end
     wndList:ArrangeChildrenVert(0, Main.SortBars)
@@ -158,13 +165,19 @@ end
 function Main:CreateBar(wndParent, tEntry)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
-  local nPercent = (tEntry.nValue / self.nTotal) * 100
+  local nPercent = 0
   local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue, 2)
 
   -- Show the difference if enabled and not the first bar
-  if #wndParent:GetChildren() > 0 and Threat.tOptions.tCharacter.bShowDifferences then
+  if #wndParent:GetChildren() > 0 then
     local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
-    sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
+    nPercent = (tEntry.nValue / nTop) * 100
+    if Threat.tOptions.tCharacter.bShowDifferences then
+      sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
+    end
+  else
+    -- This is the topmost bar.
+    nPercent = 100
   end
 
   local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
