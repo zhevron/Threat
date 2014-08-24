@@ -102,7 +102,7 @@ function Main:OnUpdateTimer()
   local nBars = math.floor(wndList:GetHeight() / wndBar:GetHeight())
   wndBar:Destroy()
 
-  if self.nTotal >= 0 then
+  if self.nTotal >= 0 and #self.tThreatList > 0 then
     wndList:DestroyChildren()
     for _, tEntry in pairs(self.tThreatList) do
       self:CreateBar(wndList, tEntry)
@@ -150,8 +150,6 @@ function Main:OnWindowSizeChanged()
 end
 
 function Main:CreateBar(wndParent, tEntry)
-  local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
-
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = (tEntry.nValue / self.nTotal) * 100
@@ -162,6 +160,8 @@ function Main:CreateBar(wndParent, tEntry)
     local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
     sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
   end
+  
+  local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
 
   -- Set the name string to the character name
   wndBar:FindChild("Name"):SetText(tEntry.sName)
@@ -282,7 +282,7 @@ function Main:ShowTestBars()
   end
   wndList:ArrangeChildrenVert(0, Main.SortBars)
 
-  self.nLastEvent = os.time() + 10
+  self.nLastEvent = os.time() + 5
 end
 
 function Main.SortBars(wndBar1, wndBar2)
