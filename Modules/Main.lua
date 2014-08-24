@@ -160,7 +160,7 @@ function Main:CreateBar(wndParent, tEntry)
     local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
     sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
   end
-  
+
   local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
 
   -- Set the name string to the character name
@@ -198,9 +198,12 @@ function Main:GetColorForEntry(tEntry)
         elseif tMemberData.bHealer then
           tColor = Threat.tOptions.tCharacter.tColors.tHealer or tWhite
         else
-          tColors = Threat.tOptions.tCharacter.tColors.tDamage or tWhite
+          tColor = Threat.tOptions.tCharacter.tColors.tDamage or tWhite
         end
       end
+    end
+    if tColor == nil then
+      tColor = tWhite
     end
   else
     -- Use non-class colors. Defaults to white if not found.
