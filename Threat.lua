@@ -9,10 +9,8 @@ Threat.tVersion = {
   nBuild = 1
 }
 
-Threat.tDefaults = {
-  tAccount = {
-  },
-  tCharacter = {
+local tDefaults = {
+  profile = {
     bEnabled = true,
     bShowSolo = false,
     bShowDifferences = false,
@@ -45,15 +43,9 @@ Threat.tDefaults = {
   }
 }
 
-Threat.tOptions = {
-  tAccount = {},
-  tCharacter = {}
-}
-
 function Threat:OnInitialize()
-  local Utility = self:GetModule("Utility")
-  self.tOptions.tCharacter = Utility:TableCopyRecursive(self.tDefaults.tCharacter)
-  self.tOptions.tAccount = Utility:TableCopyRecursive(self.tDefaults.tAccount)
+  self.tOptions = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, tDefaults)
+  self.tOptions.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
   Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end
@@ -73,7 +65,7 @@ end
 
 function Threat:OnSlashCommand()
   local Main = self:GetModule("Main")
-  self.tOptions.tCharacter.bEnabled = not Main:IsEnabled()
+  self.tOptions.profile.bEnabled = not Main:IsEnabled()
   if Main:IsEnabled() then
     Main:Disable()
   else
@@ -81,21 +73,8 @@ function Threat:OnSlashCommand()
   end
 end
 
-function Threat:OnSave(eType)
-  local Utility = self:GetModule("Utility")
-  if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    return Utility:TableCopyRecursive(self.tOptions.tCharacter)
-  elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    return Utility:TableCopyRecursive(self.tOptions.tAccount)
-  end
-  return nil
-end
-
-function Threat:OnRestore(eType, tOptions)
-  local Utility = self:GetModule("Utility")
-  if eType == GameLib.CodeEnumAddonSaveLevel.Character then
-    self.tOptions.tCharacter = Utility:TableCopyRecursive(tOptions, self.tOptions.tCharacter)
-  elseif eType == GameLib.CodeEnumAddonSaveLevel.Account then
-    self.tOptions.tAccount = Utility:TableCopyRecursive(tOptions, self.tOptions.tAccount)
-  end
+function Threat:OnProfileReset(tOptions)
+  self:GetModule("Main"):UpdatePosition()
+  self:GetModule("Main"):UpdateLockStatus()
+  self:GetModule("Settings"):ApplyCurrent()
 end

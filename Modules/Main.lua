@@ -39,7 +39,7 @@ function Main:OnEnable()
   self.tCombatTimer:Start()
   self.tUpdateTimer:Start()
 
-  if not Threat.tOptions.tCharacter.bEnabled then
+  if not Threat.tOptions.profile.bEnabled then
     self:Disable()
   end
 end
@@ -96,7 +96,7 @@ function Main:OnTargetUnitChanged(unitTarget)
 end
 
 function Main:OnCombatTimer()
-  if os.time() >= (self.nLastEvent + Threat.tOptions.tCharacter.nCombatDelay) then
+  if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
     self.wndMain:FindChild("BarList"):DestroyChildren()
     self.nDuration = 0
   else
@@ -109,7 +109,7 @@ function Main:OnUpdateTimer()
     return
   end
 
-  if not Threat.tOptions.tCharacter.bShowSolo and #self.tThreatList < 2 then
+  if not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2 then
     return
   end
 
@@ -134,7 +134,7 @@ function Main:OnUpdateTimer()
 end
 
 function Main:OnMouseEnter()
-  if not Threat.tOptions.tCharacter.bLock then
+  if not Threat.tOptions.profile.bLock then
     self.wndMain:FindChild("Background"):Show(true)
   end
 end
@@ -147,7 +147,7 @@ end
 
 function Main:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
   if eMouseButton == GameLib.CodeEnumInputMouse.Right then
-    if not Threat.tOptions.tCharacter.bLock then
+    if not Threat.tOptions.profile.bLock then
       Threat:GetModule("Settings"):Open()
     end
   end
@@ -155,14 +155,14 @@ end
 
 function Main:OnWindowMove()
   local nLeft, nTop = self.wndMain:GetAnchorOffsets()
-  Threat.tOptions.tCharacter.tPosition.nX = nLeft
-  Threat.tOptions.tCharacter.tPosition.nY = nTop
+  Threat.tOptions.profile.tPosition.nX = nLeft
+  Threat.tOptions.profile.tPosition.nY = nTop
 end
 
 function Main:OnWindowSizeChanged()
   local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
-  Threat.tOptions.tCharacter.tSize.nWidth = nRight - nLeft
-  Threat.tOptions.tCharacter.tSize.nHeight = nBottom - nTop
+  Threat.tOptions.profile.tSize.nWidth = nRight - nLeft
+  Threat.tOptions.profile.tSize.nHeight = nBottom - nTop
 end
 
 function Main:CreateBar(wndParent, tEntry)
@@ -175,7 +175,7 @@ function Main:CreateBar(wndParent, tEntry)
   if #wndParent:GetChildren() > 0 then
     local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
     nPercent = (tEntry.nValue / nTop) * 100
-    if Threat.tOptions.tCharacter.bShowDifferences then
+    if Threat.tOptions.profile.bShowDifferences then
       sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
     end
   else
@@ -207,20 +207,20 @@ function Main:GetColorForEntry(tEntry)
   local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
 
   -- Determine the color of the bar based on user settings.
-  if Threat.tOptions.tCharacter.bUseClassColors then
+  if Threat.tOptions.profile.bUseClassColors then
     -- Use class color. Defaults to white if not found.
-    tColor = Threat.tOptions.tCharacter.tColors[tEntry.eClass] or tWhite
-  elseif Threat.tOptions.tCharacter.bUseRoleColors and GroupLib.InGroup() then
+    tColor = Threat.tOptions.profile.tColors[tEntry.eClass] or tWhite
+  elseif Threat.tOptions.profile.bUseRoleColors and GroupLib.InGroup() then
     -- Use role color. Defaults to white if not found.
     for nIdx = 1, GroupLib.GetMemberCount() do
       local tMemberData = GroupLib.GetGroupMember(nIdx)
       if tMemberData.strCharacterName == tEntry.sName then
         if tMemberData.bTank then
-          tColor = Threat.tOptions.tCharacter.tColors.tTank or tWhite
+          tColor = Threat.tOptions.profile.tColors.tTank or tWhite
         elseif tMemberData.bHealer then
-          tColor = Threat.tOptions.tCharacter.tColors.tHealer or tWhite
+          tColor = Threat.tOptions.profile.tColors.tHealer or tWhite
         else
-          tColor = Threat.tOptions.tCharacter.tColors.tDamage or tWhite
+          tColor = Threat.tOptions.profile.tColors.tDamage or tWhite
         end
       end
     end
@@ -232,32 +232,32 @@ function Main:GetColorForEntry(tEntry)
     local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
-      tColor = Threat.tOptions.tCharacter.tColors.tSelf or tWhite
+      tColor = Threat.tOptions.profile.tColors.tSelf or tWhite
     else
       -- This unit is not the player.
-      tColor = Threat.tOptions.tCharacter.tColors.tOthers or tWhite
+      tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
     end
   end
 
   if tEntry.bPet then
-    tColor = Threat.tOptions.tCharacter.tColors.tPet or tWhite
+    tColor = Threat.tOptions.profile.tColors.tPet or tWhite
   end
 
   return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
 end
 
 function Main:UpdatePosition()
-  local nLeft = Threat.tOptions.tCharacter.tPosition.nX
-  local nTop = Threat.tOptions.tCharacter.tPosition.nY
-  local nWidth = Threat.tOptions.tCharacter.tSize.nWidth
-  local nHeight = Threat.tOptions.tCharacter.tSize.nHeight
+  local nLeft = Threat.tOptions.profile.tPosition.nX
+  local nTop = Threat.tOptions.profile.tPosition.nY
+  local nWidth = Threat.tOptions.profile.tSize.nWidth
+  local nHeight = Threat.tOptions.profile.tSize.nHeight
   self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
 function Main:UpdateLockStatus()
-  self.wndMain:SetStyle("Moveable", not Threat.tOptions.tCharacter.bLock)
-  self.wndMain:SetStyle("Sizable", not Threat.tOptions.tCharacter.bLock)
-  self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.tCharacter.bLock)
+  self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
+  self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)
+  self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
 end
 
 function Main:ShowTestBars()

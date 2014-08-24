@@ -8,6 +8,9 @@ externals:
   Libs/GeminiColor:
     url: https://github.com/wildstarnasa/GeminiColor.git
     tag: latest
+  Libs/GeminiDB:
+    url: https://github.com/wildstarnasa/GeminiDB.git
+    tag: latest
   Libs/GeminiLocale:
     url: https://github.com/wildstarnasa/GeminiLocale.git
     tag: latest

@@ -13,22 +13,3 @@ function Utility:FormatNumber(nNumber, nPrecision)
     return tostring(nNumber)
   end
 end
-
-function Utility:TableCopyRecursive(tSource, tDestination)
-  if type(tSource) ~= "table" then
-    return {}
-  end
-  local tMetatable = getmetatable(tSource)
-  local tDestination = self:TableCopyRecursive(tDestination)
-  if type(tDestination) ~= "table" then
-    return
-  end
-  for oKey, oValue in pairs(tSource) do
-    if type(oValue) == "table" then
-      oValue = self:TableCopyRecursive(oValue)
-    end
-    tDestination[oKey] = oValue
-  end
-  setmetatable(tDestination, tMetatable)
-  return tDestination
-end

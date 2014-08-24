@@ -3,6 +3,7 @@
   <!-- Libs -->
   <Script Name="Libs/GeminiAddon/GeminiAddon.lua"/>
   <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
+  <Script Name="Libs/GeminiDB/GeminiDB-1.0.lua"/>
   <Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
 
   <!-- Main -->
