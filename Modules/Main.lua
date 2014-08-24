@@ -85,7 +85,7 @@ function Main:OnTargetThreatListUpdated(...)
   -- Sort the new threat list
   table.sort(self.tThreatList,
     function(oValue1, oValue2)
-      return oValue1.nValue < oValue2.nValue
+      return oValue1.nValue > oValue2.nValue
     end
   )
 end
