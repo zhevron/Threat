@@ -3,6 +3,7 @@
   <!-- Libs -->
   <Script Name="Libs/GeminiAddon/GeminiAddon.lua"/>
   <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
+  <Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
   <Script Name="Libs/GeminiLogging/GeminiLogging.lua"/>
 
   <!-- Main -->
@@ -14,6 +15,9 @@
   <Script Name="Modules/Utility.lua"/>
 
   <!-- Locales -->
+  <Script Name="Locales/English.lua"/>
+  <Script Name="Locales/German.lua"/>
+  <Script Name="Locales/French.lua"/>
 
   <!-- Forms -->
   <Form Name="Forms/Main.xml"/>

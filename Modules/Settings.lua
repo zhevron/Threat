@@ -21,7 +21,10 @@ function Settings:OnDisable()
 end
 
 function Settings:OnDocumentReady()
+  local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
+  local L = GeminiLocale:GetLocale("Threat", true)
   self.wndMain = Apollo.LoadForm(self.oXml, "Settings", nil, self)
+  GeminiLocale:TranslateWindow(L, self.wndMain)
   self.wndMain:Show(false)
   self:ApplyCurrent()
 end
@@ -101,13 +104,14 @@ function Settings:ApplyCurrent()
 end
 
 function Settings:CreateColors()
+  local L = Apollo.GetPackage("Gemini:Locale-1.0").tPackage:GetLocale("Threat", true)
   local wndList = self.wndMain:FindChild("LstColor")
   wndList:DestroyChildren()
 
   local wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
   local tColor = Threat.tOptions.tCharacter.tColors.sSelf
   wndColor:SetData("sSelf")
-  wndColor:FindChild("Name"):SetText("Self")
+  wndColor:FindChild("Name"):SetText(L["self"])
   wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
     tColor.nR / 255,
     tColor.nG / 255,
@@ -118,7 +122,7 @@ function Settings:CreateColors()
   wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
   tColor = Threat.tOptions.tCharacter.tColors.sOthers
   wndColor:SetData("sOthers")
-  wndColor:FindChild("Name"):SetText("Others")
+  wndColor:FindChild("Name"):SetText(L["others"])
   wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
     tColor.nR / 255,
     tColor.nG / 255,
