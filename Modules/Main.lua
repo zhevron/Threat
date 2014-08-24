@@ -143,7 +143,7 @@ function Main:CreateBar(wndParent, tEntry)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = (tEntry.nValue / self.nTotal) * 100
-  local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue)
+  local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue, 2)
 
   -- Set the name string to the character name
   wndBar:FindChild("Name"):SetText(tEntry.sName)
