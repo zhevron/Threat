@@ -57,6 +57,7 @@ end
 
 function Settings:OnBtnReset(wndHandler, wndControl)
   Threat.tOptions = Threat:GetModule("Utility"):TableCopyRecursive(Threat.tDefaults)
+  Threat:GetModule("Main"):UpdatePosition()
   self:ApplyCurrent()
 end
 

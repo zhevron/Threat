@@ -56,13 +56,8 @@ end
 
 function Main:OnDocumentReady()
   self.wndMain = Apollo.LoadForm(self.oXml, "Threat", nil, self)
+  self:UpdatePosition()
   self:UpdateLockStatus()
-
-  local nLeft = Threat.tOptions.tCharacter.tPosition.nX
-  local nTop = Threat.tOptions.tCharacter.tPosition.nY
-  local nWidth = Threat.tOptions.tCharacter.tSize.nWidth
-  local nHeight = Threat.tOptions.tCharacter.tSize.nHeight
-  self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
 function Main:OnTargetThreatListUpdated(...)
@@ -204,6 +199,14 @@ function Main:GetColorForEntry(tEntry)
   end
 
   return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
+end
+
+function Main:UpdatePosition()
+  local nLeft = Threat.tOptions.tCharacter.tPosition.nX
+  local nTop = Threat.tOptions.tCharacter.tPosition.nY
+  local nWidth = Threat.tOptions.tCharacter.tSize.nWidth
+  local nHeight = Threat.tOptions.tCharacter.tSize.nHeight
+  self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
 function Main:UpdateLockStatus()
