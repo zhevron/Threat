@@ -98,12 +98,22 @@ function Main:OnUpdateTimer()
   end
 
   local wndList = self.wndMain:FindChild("BarList")
+  local wndBar = Apollo.LoadForm(self.oXml, "Bar", nil, self)
+  local nBars = math.floor(wndList:GetHeight() / wndBar:GetHeight())
+  wndBar:Destroy()
+
   if self.nTotal >= 0 then
     wndList:DestroyChildren()
     for _, tEntry in pairs(self.tThreatList) do
       self:CreateBar(wndList, tEntry)
     end
     wndList:ArrangeChildrenVert(0, Main.SortBars)
+  end
+
+  if #wndList:GetChildren() > nBars then
+    for nIdx = nBars + 1, #wndList:GetChildren() do
+      wndList:GetChildren()[nIdx]:Destroy()
+    end
   end
 end
 
