@@ -11,9 +11,6 @@ externals:
   Libs/GeminiLocale:
     url: https://github.com/wildstarnasa/GeminiLocale.git
     tag: latest
-  Libs/GeminiLogging:
-    url: https://github.com/wildstarnasa/GeminiLogging.git
-    tag: latest
 
 ignore:
   - README.md

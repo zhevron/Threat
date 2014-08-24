@@ -4,7 +4,6 @@
   <Script Name="Libs/GeminiAddon/GeminiAddon.lua"/>
   <Script Name="Libs/GeminiColor/GeminiColor.lua"/>
   <Script Name="Libs/GeminiLocale/GeminiLocale.lua"/>
-  <Script Name="Libs/GeminiLogging/GeminiLogging.lua"/>
 
   <!-- Main -->
   <Script Name="Threat.lua"/>
