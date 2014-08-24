@@ -71,13 +71,15 @@ function Main:OnTargetThreatListUpdated(...)
   for nId = 1, select("#", ...), 2 do
     local oUnit = select(nId, ...)
     local nValue = select(nId + 1, ...)
-    table.insert(self.tThreatList, {
-      nId = oUnit:GetId(),
-      sName = oUnit:GetName(),
-      eClass = oUnit:GetClassId(),
-      nValue = nValue
-    })
-    self.nTotal = self.nTotal + nValue
+    if oUnit ~= nil then
+      table.insert(self.tThreatList, {
+        nId = oUnit:GetId(),
+        sName = oUnit:GetName(),
+        eClass = oUnit:GetClassId(),
+        nValue = nValue
+      })
+      self.nTotal = self.nTotal + nValue
+    end
   end
 
   -- Sort the new threat list
