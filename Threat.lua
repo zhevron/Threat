@@ -4,9 +4,9 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat", true)
 
 Threat.tVersion = {
-  nMajor = 0,
+  nMajor = 1,
   nMinor = 0,
-  nBuild = 1
+  nBuild = 0
 }
 
 local tDefaults = {
