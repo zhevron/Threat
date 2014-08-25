@@ -78,3 +78,7 @@ function Threat:OnProfileReset(tOptions)
   self:GetModule("Main"):UpdateLockStatus()
   self:GetModule("Settings"):ApplyCurrent()
 end
+
+function Threat:GetVersionString()
+  return string.format("%d.%d.%d", self.tVersion.nMajor, self.tVersion.nMinor, self.tVersion.nBuild)
+end
