@@ -45,12 +45,16 @@ end
 
 function Settings:OnBtnClassColors(wndHandler, wndControl)
   Threat.tOptions.profile.bUseClassColors = wndControl:IsChecked()
-  Threat.tOptions.profile.bUseRoleColors = not wndControl:IsChecked()
+  if wndControl:IsChecked() then
+    Threat.tOptions.profile.bUseRoleColors = false
+  end
 end
 
 function Settings:OnBtnRoleColors(wndHandler, wndControl)
-  Threat.tOptions.profile.bUseClassColors = not wndControl:IsChecked()
   Threat.tOptions.profile.bUseRoleColors = wndControl:IsChecked()
+  if wndControl:IsChecked() then
+    Threat.tOptions.profile.bUseClassColors = false
+  end
 end
 
 function Settings:OnBtnShowSolo(wndHandler, wndControl)
