@@ -2,6 +2,9 @@ package-as: Threat
 enable-nolib-creation: no
 
 externals:
+  Libs/CallbackHandler:
+    url: https://github.com/wildstarnasa/CallbackHandler.git
+    tag: latest
   Libs/GeminiAddon:
     url: https://github.com/wildstarnasa/GeminiAddon.git
     tag: 1.1.6
@@ -17,5 +20,3 @@ externals:
 
 ignore:
   - README.md
-
-license-output: LICENSE.txt
