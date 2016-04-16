@@ -65,6 +65,10 @@ function Settings:OnBtnShowDifferences(wndHandler, wndControl)
   Threat.tOptions.profile.bShowDifferences = wndControl:IsChecked()
 end
 
+function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
+  Threat.tOptions.profile.bShowSelfWarning = wndControl:IsChecked()
+end
+
 function Settings:OnBtnReset(wndHandler, wndControl)
   Threat.tOptions:ResetProfile()
 end
@@ -117,6 +121,7 @@ function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.bUseRoleColors)
   self.wndMain:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.profile.bShowSolo)
   self.wndMain:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.profile.bShowDifferences)
+  self.wndMain:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.bShowSelfWarning)
   self:CreateColors()
 end
 
@@ -129,6 +134,17 @@ function Settings:CreateColors()
   local tColor = Threat.tOptions.profile.tColors.tSelf
   wndColor:SetData("tSelf")
   wndColor:FindChild("Name"):SetText(L["self"])
+  wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+    tColor.nR / 255,
+    tColor.nG / 255,
+    tColor.nB / 255,
+    tColor.nA / 255
+  ))
+  
+  wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
+  tColor = Threat.tOptions.profile.tColors.tSelfWarning
+  wndColor:SetData("tSelfWarning")
+  wndColor:FindChild("Name"):SetText(L["selfWarning"])
   wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
     tColor.nR / 255,
     tColor.nG / 255,
