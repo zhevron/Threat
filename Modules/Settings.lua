@@ -65,6 +65,10 @@ function Settings:OnBtnShowDifferences(wndHandler, wndControl)
   Threat.tOptions.profile.bShowDifferences = wndControl:IsChecked()
 end
 
+function Settings:OnBtnAlwaysUseSelf(wndHandler, wndControl)
+  Threat.tOptions.profile.bUseSelfColor = wndControl:IsChecked()
+end
+
 function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
   Threat.tOptions.profile.bShowSelfWarning = wndControl:IsChecked()
 end
@@ -121,6 +125,7 @@ function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.bUseRoleColors)
   self.wndMain:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.profile.bShowSolo)
   self.wndMain:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.profile.bShowDifferences)
+  self.wndMain:FindChild("BtnAlwaysUseSelf"):SetCheck(Threat.tOptions.profile.bUseSelfColor)
   self.wndMain:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.bShowSelfWarning)
   self:CreateColors()
 end

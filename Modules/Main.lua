@@ -207,6 +207,7 @@ end
 function Main:GetColorForEntry(tEntry, bFirst)
   local tColor = nil
   local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
+  local bForceSelf = false
 
   -- Determine the color of the bar based on user settings.
   if Threat.tOptions.profile.bUseClassColors then
@@ -231,17 +232,19 @@ function Main:GetColorForEntry(tEntry, bFirst)
     end
   else
     -- Use non-class colors. Defaults to white if not found.
+    bForceSelf = true
+    tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
+  end
+
+  if Threat.tOptions.profile.bUseSelfColor or bForceSelf then
     local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
-      if Threat.tOptions.profile.bShowSelfWarning and bFirst ~= nil and bFirst == true then
+      if Threat.tOptions.profile.bShowSelfWarning and bFirst ~= nil and bFirst then
         tColor = Threat.tOptions.profile.tColors.tSelfWarning or tWhite
       else
         tColor = Threat.tOptions.profile.tColors.tSelf or tWhite
       end
-    else
-      -- This unit is not the player.
-      tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
     end
   end
 

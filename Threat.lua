@@ -14,6 +14,7 @@ local tDefaults = {
     bEnabled = true,
     bShowSolo = false,
     bShowDifferences = false,
+    bUseSelfColor = true,
     bShowSelfWarning = false,
     bLock = false,
     tPosition = {
