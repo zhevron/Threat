@@ -120,8 +120,10 @@ function Main:OnUpdateTimer()
 
   if self.nTotal >= 0 and #self.tThreatList > 0 then
     wndList:DestroyChildren()
-    for _, tEntry in ipairs(self.tThreatList) do
-      self:CreateBar(wndList, tEntry)
+    for tIndex, tEntry in ipairs(self.tThreatList) do
+      local bFirst = false
+      if tIndex == 1 then bFirst = true end
+      self:CreateBar(wndList, tEntry, bFirst)
     end
     wndList:ArrangeChildrenVert(0, Main.SortBars)
   end
@@ -165,7 +167,7 @@ function Main:OnWindowSizeChanged()
   Threat.tOptions.profile.tSize.nHeight = nBottom - nTop
 end
 
-function Main:CreateBar(wndParent, tEntry)
+function Main:CreateBar(wndParent, tEntry, bFirst)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = 0
@@ -196,15 +198,16 @@ function Main:CreateBar(wndParent, tEntry)
   wndBar:FindChild("Total"):SetData(tEntry.nValue)
 
   -- Update the progress bar with the new values and set the bar color.
-  local nR, nG, nB, nA = self:GetColorForEntry(tEntry)
+  local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst)
   local nLeft, nTop, _, nBottom = wndBar:FindChild("Background"):GetAnchorPoints()
   wndBar:FindChild("Background"):SetAnchorPoints(nLeft, nTop, nPercent / 100, nBottom)
   wndBar:FindChild("Background"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 end
 
-function Main:GetColorForEntry(tEntry)
+function Main:GetColorForEntry(tEntry, bFirst)
   local tColor = nil
   local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
+  local bForceSelf = false
 
   -- Determine the color of the bar based on user settings.
   if Threat.tOptions.profile.bUseClassColors then
@@ -229,13 +232,19 @@ function Main:GetColorForEntry(tEntry)
     end
   else
     -- Use non-class colors. Defaults to white if not found.
+    bForceSelf = true
+    tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
+  end
+
+  if Threat.tOptions.profile.bUseSelfColor or bForceSelf then
     local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
-      tColor = Threat.tOptions.profile.tColors.tSelf or tWhite
-    else
-      -- This unit is not the player.
-      tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
+      if Threat.tOptions.profile.bShowSelfWarning and bFirst ~= nil and bFirst then
+        tColor = Threat.tOptions.profile.tColors.tSelfWarning or tWhite
+      else
+        tColor = Threat.tOptions.profile.tColors.tSelf or tWhite
+      end
     end
   end
 
@@ -321,7 +330,7 @@ function Main:ShowTestBars()
   self.nTotal = 0
   for _, tEntry in pairs(tEntries) do
     self.nTotal = self.nTotal + tEntry.nValue
-    self:CreateBar(wndList, tEntry)
+    self:CreateBar(wndList, tEntry, false)
   end
   wndList:ArrangeChildrenVert(0, Main.SortBars)
 
