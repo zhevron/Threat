@@ -43,6 +43,15 @@ function Settings:OnBtnLock(wndHandler, wndControl)
   Threat:GetModule("Main"):UpdateLockStatus()
 end
 
+--  Color Select
+
+function Settings:OnBtnSimpleColors(wndHandler, wndControl)
+  if wndControl:IsChecked() then
+    Threat.tOptions.profile.bUseClassColors = false
+    Threat.tOptions.profile.bUseRoleColors = false
+  end
+end
+
 function Settings:OnBtnClassColors(wndHandler, wndControl)
   Threat.tOptions.profile.bUseClassColors = wndControl:IsChecked()
   if wndControl:IsChecked() then
@@ -57,6 +66,8 @@ function Settings:OnBtnRoleColors(wndHandler, wndControl)
   end
 end
 
+--  Show Options
+
 function Settings:OnBtnShowSolo(wndHandler, wndControl)
   Threat.tOptions.profile.bShowSolo = wndControl:IsChecked()
 end
@@ -65,6 +76,12 @@ function Settings:OnBtnShowDifferences(wndHandler, wndControl)
   Threat.tOptions.profile.bShowDifferences = wndControl:IsChecked()
 end
 
+function Settings:OnBtnShowTPS(wndHandler, wndControl)
+  Threat.tOptions.profile.bShowThreatPerSec = wndControl:IsChecked()
+end
+
+--  Other Options
+
 function Settings:OnBtnAlwaysUseSelf(wndHandler, wndControl)
   Threat.tOptions.profile.bUseSelfColor = wndControl:IsChecked()
 end
@@ -72,6 +89,12 @@ end
 function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
   Threat.tOptions.profile.bShowSelfWarning = wndControl:IsChecked()
 end
+
+function Settings:OnBtnRightToLeftBars(wndHandler, wndControl)
+  Threat.tOptions.profile.bRightToLeftBars = wndControl:IsChecked()
+end
+
+--  Buttons
 
 function Settings:OnBtnReset(wndHandler, wndControl)
   Threat.tOptions:ResetProfile()
@@ -121,12 +144,15 @@ end
 function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnEnable"):SetCheck(Threat.tOptions.profile.bEnabled)
   self.wndMain:FindChild("BtnLock"):SetCheck(Threat.tOptions.profile.bLock)
+  self.wndMain:FindChild("BtnSimpleColors"):SetCheck(not (Threat.tOptions.profile.bUseRoleColors or Threat.tOptions.profile.bUseClassColors))
   self.wndMain:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.profile.bUseClassColors)
   self.wndMain:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.bUseRoleColors)
   self.wndMain:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.profile.bShowSolo)
   self.wndMain:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.profile.bShowDifferences)
+  self.wndMain:FindChild("BtnShowThreatPerSec"):SetCheck(Threat.tOptions.profile.bShowThreatPerSec)
   self.wndMain:FindChild("BtnAlwaysUseSelf"):SetCheck(Threat.tOptions.profile.bUseSelfColor)
   self.wndMain:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.bShowSelfWarning)
+  self.wndMain:FindChild("BtnRightToLeftBars"):SetCheck(Threat.tOptions.profile.bRightToLeftBars)
   self:CreateColors()
 end
 

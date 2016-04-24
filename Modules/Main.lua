@@ -191,17 +191,28 @@ function Main:CreateBar(wndParent, tEntry, bFirst)
   wndBar:FindChild("Name"):SetText(tEntry.sName)
 
   -- Print threat per second as a floating point number with a precision of 1. (Ex. 7572.2)
-  wndBar:FindChild("ThreatPerSecond"):SetText(string.format("%.1f", nPerSecond))
+  if Threat.tOptions.profile.bShowThreatPerSec then
+    wndBar:FindChild("ThreatPerSecond"):SetText(string.format("%.1f", nPerSecond))
+  else
+    wndBar:FindChild("ThreatPerSecond"):SetText("")
+  end
 
   -- Print the total as a string with the formatted number and percentage of total. (Ex. 300k  42%)
   wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent, "%"))
   wndBar:FindChild("Total"):SetData(tEntry.nValue)
 
   -- Update the progress bar with the new values and set the bar color.
+  local wndBarBackground = wndBar:FindChild("Background")
   local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst)
-  local nLeft, nTop, _, nBottom = wndBar:FindChild("Background"):GetAnchorPoints()
-  wndBar:FindChild("Background"):SetAnchorPoints(nLeft, nTop, nPercent / 100, nBottom)
-  wndBar:FindChild("Background"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
+  local nLeft, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
+  
+  if Threat.tOptions.profile.bRightToLeftBars then
+    wndBarBackground:SetAnchorPoints(nLeft + (1 - nPercent / 100), nTop, 1, nBottom)
+  else
+    wndBarBackground:SetAnchorPoints(nLeft, nTop, nPercent / 100, nBottom)
+  end
+  
+  wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 end
 
 function Main:GetColorForEntry(tEntry, bFirst)

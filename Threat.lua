@@ -6,7 +6,7 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat",
 Threat.tVersion = {
   nMajor = 1,
   nMinor = 0,
-  nBuild = 2
+  nBuild = 3
 }
 
 local tDefaults = {
@@ -14,8 +14,10 @@ local tDefaults = {
     bEnabled = true,
     bShowSolo = false,
     bShowDifferences = false,
+    bShowThreatPerSec = true,
     bUseSelfColor = false,
     bShowSelfWarning = false,
+    bRightToLeftBars = false,
     bLock = false,
     tPosition = {
       nX = 100,
@@ -36,12 +38,12 @@ local tDefaults = {
       tTank = { nR = 154, nG = 25, nB = 230, nA = 255 },
       tHealer = { nR = 87, nG = 156, nB = 12, nA = 255 },
       tDamage = { nR = 235, nG = 27, nB = 27, nA = 255 },
-      [GameLib.CodeEnumClass.Warrior] = { nR = 245, nG = 79, nB = 79, nA = 255 },
-      [GameLib.CodeEnumClass.Engineer] = { nR = 255, nG = 231, nB = 87, nA = 255 },
-      [GameLib.CodeEnumClass.Esper] = { nR = 21, nG = 145, nB = 219, nA = 255 },
-      [GameLib.CodeEnumClass.Medic] = { nR = 84, nG = 207, nB = 23, nA = 255 },
-      [GameLib.CodeEnumClass.Spellslinger] = { nR = 240, nG = 164, nB = 53, nA = 255 },
-      [GameLib.CodeEnumClass.Stalker] = { nR = 210, nG = 62, nB = 244, nA = 255 }
+      [GameLib.CodeEnumClass.Warrior] = { nR = 204, nG = 26, nB = 26, nA = 255 },
+      [GameLib.CodeEnumClass.Engineer] = { nR = 204, nG = 204, nB = 0, nA = 255 },
+      [GameLib.CodeEnumClass.Esper] = { nR = 26, nG = 128, nB = 179, nA = 255 },
+      [GameLib.CodeEnumClass.Medic] = { nR = 51, nG = 153, nB = 26, nA = 255 },
+      [GameLib.CodeEnumClass.Spellslinger] = { nR = 230, nG = 102, nB = 0, nA = 255 },
+      [GameLib.CodeEnumClass.Stalker] = { nR = 128, nG = 26, nB = 204, nA = 255 }
     }
   }
 }
