@@ -60,6 +60,17 @@ function Main:OnDocumentReady()
   self.wndMain = Apollo.LoadForm(self.oXml, "Threat", nil, self)
   self:UpdatePosition()
   self:UpdateLockStatus()
+
+  --Pre add Bar list 
+  local wndList = self.wndMain:FindChild("BarList")
+  local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
+  local nBars = math.floor(wndList:GetHeight() / wndBarTemp:GetHeight())
+  wndBarTemp:Destroy()
+
+  for nInd = 1, nBars do
+    local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndList, self)
+    wndBar:Show(false)
+  end
 end
 
 function Main:OnTargetThreatListUpdated(...)
@@ -92,12 +103,12 @@ function Main:OnTargetThreatListUpdated(...)
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
-  self.wndMain:FindChild("BarList"):DestroyChildren()
+  --self.wndMain:FindChild("BarList"):DestroyChildren()
 end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
-    self.wndMain:FindChild("BarList"):DestroyChildren()
+    --self.wndMain:FindChild("BarList"):DestroyChildren()
     self.nDuration = 0
   else
     self.nDuration = self.nDuration + 1
@@ -118,21 +129,27 @@ function Main:OnUpdateTimer()
   local nBars = math.floor(wndList:GetHeight() / wndBar:GetHeight())
   wndBar:Destroy()
 
-  if self.nTotal >= 0 and #self.tThreatList > 0 then
-    wndList:DestroyChildren()
-    for tIndex, tEntry in ipairs(self.tThreatList) do
-      local bFirst = false
-      if tIndex == 1 then bFirst = true end
-      self:CreateBar(wndList, tEntry, bFirst)
+  for nIdx = 1, #wndList:GetChildren() do
+      wndList:GetChildren()[nIdx]:Show(false)
     end
-    wndList:ArrangeChildrenVert(0, Main.SortBars)
-  end
 
+  if self.nTotal >= 0 and #self.tThreatList > 0 then
+    --wndList:DestroyChildren()
+    for tIndex, tEntry in ipairs(self.tThreatList) do
+      if nBars >= tIndex then
+        self:CreateBar(wndList, tEntry, tIndex == 1, wndList:GetChildren()[tIndex])
+      end
+    end
+    --wndList:ArrangeChildrenVert(0, Main.SortBars)
+    wndList:ArrangeChildrenVert(0, true)
+  end
+--[[
   if #wndList:GetChildren() > nBars then
     for nIdx = nBars + 1, #wndList:GetChildren() do
       wndList:GetChildren()[nIdx]:Destroy()
     end
   end
+  ]]
 end
 
 function Main:OnMouseEnter()
@@ -167,25 +184,28 @@ function Main:OnWindowSizeChanged()
   Threat.tOptions.profile.tSize.nHeight = nBottom - nTop
 end
 
-function Main:CreateBar(wndParent, tEntry, bFirst)
+function Main:CreateBar(wndParent, tEntry, bFirst, wndBar)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = 0
   local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue, 2)
 
   -- Show the difference if enabled and not the first bar
-  if #wndParent:GetChildren() > 0 then
+  if not bFirst then
     local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
-    nPercent = (tEntry.nValue / nTop) * 100
-    if Threat.tOptions.profile.bShowDifferences then
-      sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
+    if nTop and nTop ~= nil then
+      nPercent = (tEntry.nValue / nTop) * 100
+      if Threat.tOptions.profile.bShowDifferences then
+        sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
+      end
     end
   else
     -- This is the topmost bar.
     nPercent = 100
   end
 
-  local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
+  --local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
+  wndBar:Show(true)
 
   -- Set the name string to the character name
   wndBar:FindChild("Name"):SetText(tEntry.sName)
@@ -335,7 +355,7 @@ function Main:ShowTestBars()
   }
 
   local wndList = self.wndMain:FindChild("BarList")
-  wndList:DestroyChildren()
+  --wndList:DestroyChildren()
 
   self.nDuration = 10
   self.nTotal = 0
