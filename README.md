@@ -26,3 +26,4 @@ After making the contributions in your forked repository, please submit a [pull 
 The addon is currently maintained by the following:
 * [Zhevron @ Ascendancy EU](https://www.curse.com/users/_Zhevron)
 * [Nimmock](http://wildstar.curseforge.com/members/Nimmock)
+* [Amion](http://wildstar.curseforge.com/members/Amion)
