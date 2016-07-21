@@ -10,6 +10,8 @@ Main.tThreatList = {}
 Main.nTotal = 0
 Main.nDuration = 0
 Main.nLastEvent = 0
+Main.nBarSlots = 0
+Main.bEnableBarUpdate = true
 
 function Main:OnInitialize()
   self.oXml = XmlDoc.CreateFromFile("Forms/Main.xml")
@@ -61,22 +63,17 @@ function Main:OnDocumentReady()
   self:UpdatePosition()
   self:UpdateLockStatus()
 
-  --Pre add Bar list 
-  local wndList = self.wndMain:FindChild("BarList")
+  --Get Bar Slots
   local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
-  local nBars = math.floor(wndList:GetHeight() / wndBarTemp:GetHeight())
+  self.nBarSlots = math.floor(self.wndMain:FindChild("BarList"):GetHeight() / wndBarTemp:GetHeight())
   wndBarTemp:Destroy()
-
-  for nInd = 1, nBars do
-    local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndList, self)
-    wndBar:Show(false)
-  end
 end
 
 function Main:OnTargetThreatListUpdated(...)
   self.tThreatList = {}
   self.nTotal = 0
   self.nLastEvent = os.time()
+  self.bEnableBarUpdate = true
 
   -- Create the new threat list
   for nId = 1, select("#", ...), 2 do
@@ -103,15 +100,36 @@ function Main:OnTargetThreatListUpdated(...)
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
-  --self.wndMain:FindChild("BarList"):DestroyChildren()
+  self.wndMain:FindChild("BarList"):DestroyChildren()
 end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
-    --self.wndMain:FindChild("BarList"):DestroyChildren()
+    self.wndMain:FindChild("BarList"):DestroyChildren()
     self.nDuration = 0
+    self.bEnableBarUpdate = true
   else
     self.nDuration = self.nDuration + 1
+  end
+end
+
+function Main:CreateBars(wndList, nTListNum)
+  local nListNum = #wndList:GetChildren()
+  local nThreatListNum = math.min(self.nBarSlots, nTListNum)
+
+  --Check if needs to do any work
+  if self.bEnableBarUpdate and nListNum ~= nThreatListNum then
+    if nListNum > nThreatListNum then
+      --If needs to remove some bars
+      for nIdx = nListNum, nThreatListNum + 1, -1 do
+        wndList:GetChildren()[nIdx]:Destroy()
+      end
+    else
+      --If needs to create some bars
+      for nIdx = nListNum + 1, nThreatListNum do
+        Apollo.LoadForm(self.oXml, "Bar", wndList, self)
+      end
+    end
   end
 end
 
@@ -125,31 +143,19 @@ function Main:OnUpdateTimer()
   end
 
   local wndList = self.wndMain:FindChild("BarList")
-  local wndBar = Apollo.LoadForm(self.oXml, "Bar", nil, self)
-  local nBars = math.floor(wndList:GetHeight() / wndBar:GetHeight())
-  wndBar:Destroy()
 
-  for nIdx = 1, #wndList:GetChildren() do
-      wndList:GetChildren()[nIdx]:Show(false)
-    end
+  --Set correct amount of bars
+  self:CreateBars(wndList, #self.tThreatList)
 
+  --Set bar data
   if self.nTotal >= 0 and #self.tThreatList > 0 then
-    --wndList:DestroyChildren()
     for tIndex, tEntry in ipairs(self.tThreatList) do
-      if nBars >= tIndex then
-        self:CreateBar(wndList, tEntry, tIndex == 1, wndList:GetChildren()[tIndex])
+      if #wndList:GetChildren() >= tIndex then
+        self:SetupBar(wndList, tEntry, tIndex == 1, wndList:GetChildren()[tIndex])
       end
     end
-    --wndList:ArrangeChildrenVert(0, Main.SortBars)
     wndList:ArrangeChildrenVert(0, true)
   end
---[[
-  if #wndList:GetChildren() > nBars then
-    for nIdx = nBars + 1, #wndList:GetChildren() do
-      wndList:GetChildren()[nIdx]:Destroy()
-    end
-  end
-  ]]
 end
 
 function Main:OnMouseEnter()
@@ -184,7 +190,7 @@ function Main:OnWindowSizeChanged()
   Threat.tOptions.profile.tSize.nHeight = nBottom - nTop
 end
 
-function Main:CreateBar(wndParent, tEntry, bFirst, wndBar)
+function Main:SetupBar(wndParent, tEntry, bFirst, wndBar)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = 0
@@ -204,9 +210,6 @@ function Main:CreateBar(wndParent, tEntry, bFirst, wndBar)
     nPercent = 100
   end
 
-  --local wndBar = Apollo.LoadForm(self.oXml, "Bar", wndParent, self)
-  wndBar:Show(true)
-
   -- Set the name string to the character name
   wndBar:FindChild("Name"):SetText(tEntry.sName)
 
@@ -224,12 +227,12 @@ function Main:CreateBar(wndParent, tEntry, bFirst, wndBar)
   -- Update the progress bar with the new values and set the bar color.
   local wndBarBackground = wndBar:FindChild("Background")
   local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst)
-  local nLeft, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
+  local _, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
   
   if Threat.tOptions.profile.bRightToLeftBars then
-    wndBarBackground:SetAnchorPoints(nLeft + (1 - nPercent / 100), nTop, 1, nBottom)
+    wndBarBackground:SetAnchorPoints(1 - nPercent / 100, nTop, 1, nBottom)
   else
-    wndBarBackground:SetAnchorPoints(nLeft, nTop, nPercent / 100, nBottom)
+    wndBarBackground:SetAnchorPoints(0, nTop, nPercent / 100, nBottom)
   end
   
   wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
@@ -355,21 +358,17 @@ function Main:ShowTestBars()
   }
 
   local wndList = self.wndMain:FindChild("BarList")
-  --wndList:DestroyChildren()
+
+  self:CreateBars(wndList, #tEntries)
+  self.bEnableBarUpdate = false
 
   self.nDuration = 10
   self.nTotal = 0
-  for _, tEntry in pairs(tEntries) do
+  for tIndex, tEntry in pairs(tEntries) do
     self.nTotal = self.nTotal + tEntry.nValue
-    self:CreateBar(wndList, tEntry, false)
+    self:SetupBar(wndList, tEntry, tIndex == 1, wndList:GetChildren()[tIndex])
   end
-  wndList:ArrangeChildrenVert(0, Main.SortBars)
+  wndList:ArrangeChildrenVert(0, true)
 
   self.nLastEvent = os.time() + 5
-end
-
-function Main.SortBars(wndBar1, wndBar2)
-  local nValue1 = wndBar1:FindChild("Total"):GetData()
-  local nValue2 = wndBar2:FindChild("Total"):GetData()
-  return nValue1 >= nValue2
 end
