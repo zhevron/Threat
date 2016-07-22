@@ -5,8 +5,8 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat",
 
 Threat.tVersion = {
   nMajor = 1,
-  nMinor = 0,
-  nBuild = 4
+  nMinor = 1,
+  nBuild = 0
 }
 
 local tDefaults = {
@@ -51,6 +51,7 @@ local tDefaults = {
 function Threat:OnInitialize()
   self.tOptions = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, tDefaults)
   self.tOptions.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
+  self.tOptions.RegisterCallback(self, "OnProfileCopied", "OnProfileCopied")
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
   Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end
@@ -79,6 +80,12 @@ function Threat:OnSlashCommand()
 end
 
 function Threat:OnProfileReset(tOptions)
+  self:GetModule("Main"):UpdatePosition()
+  self:GetModule("Main"):UpdateLockStatus()
+  self:GetModule("Settings"):ApplyCurrent()
+end
+
+function Threat:OnProfileCopied(db, sourceProfile)
   self:GetModule("Main"):UpdatePosition()
   self:GetModule("Main"):UpdateLockStatus()
   self:GetModule("Settings"):ApplyCurrent()

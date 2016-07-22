@@ -72,9 +72,6 @@ function Main:OnDocumentReady()
   wndBarTemp:Destroy()
 
   self:SetBarSlots()
-
-  --Test
-  self.wndMain:FindChild("Background"):SetBGColor(ApolloColor.new(1, 1, 1, 0.15))
 end
 
 function Main:SetBarSlots()
@@ -229,7 +226,7 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest)
 
   -- Print the total as a string with the formatted number and percentage of total. (Ex. 300k  42%)
   wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent * 100, "%"))
-  wndBar:FindChild("Total"):SetData(tEntry.nValue)
+  --wndBar:FindChild("Total"):SetData(tEntry.nValue)
 
   -- Update the progress bar with the new values and set the bar color.
   local wndBarBackground = wndBar:FindChild("Background")
