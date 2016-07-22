@@ -7,9 +7,9 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Main = Threat:NewModule("Main")
 
 Main.tThreatList = {}
-Main.nTotal = 0
 Main.nDuration = 0
 Main.nLastEvent = 0
+Main.nBarHeight = 10
 Main.nBarSlots = 0
 Main.bEnableBarUpdate = true
 
@@ -63,15 +63,20 @@ function Main:OnDocumentReady()
   self:UpdatePosition()
   self:UpdateLockStatus()
 
-  --Get Bar Slots
+  --Get Bar Size
   local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
-  self.nBarSlots = math.floor(self.wndMain:FindChild("BarList"):GetHeight() / wndBarTemp:GetHeight())
+  self.nBarHeight = wndBarTemp:GetHeight()
   wndBarTemp:Destroy()
+
+  self:SetBarSlots()
+end
+
+function Main:SetBarSlots()
+  self.nBarSlots = math.floor(self.wndMain:FindChild("BarList"):GetHeight() / self.nBarHeight)
 end
 
 function Main:OnTargetThreatListUpdated(...)
   self.tThreatList = {}
-  self.nTotal = 0
   self.nLastEvent = os.time()
   self.bEnableBarUpdate = true
 
@@ -87,7 +92,6 @@ function Main:OnTargetThreatListUpdated(...)
         bPet = oUnit:GetUnitOwner() ~= nil,
         nValue = nValue
       })
-      self.nTotal = self.nTotal + nValue
     end
   end
 
@@ -146,14 +150,17 @@ function Main:OnUpdateTimer()
 
   --Set correct amount of bars
   self:CreateBars(wndList, #self.tThreatList)
+  local nBars = #wndList:GetChildren()
 
   --Set bar data
-  if self.nTotal >= 0 and #self.tThreatList > 0 then
+  if #self.tThreatList > 0 and nBars > 0 then
+    local nTopThreat = self.tThreatList[1].nValue
+
     for tIndex, tEntry in ipairs(self.tThreatList) do
-      if #wndList:GetChildren() >= tIndex then
-        self:SetupBar(wndList, tEntry, tIndex == 1, wndList:GetChildren()[tIndex])
-      end
+      self:SetupBar(wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
+      if nBars == tIndex then break end
     end
+
     wndList:ArrangeChildrenVert(0, true)
   end
 end
@@ -188,26 +195,22 @@ function Main:OnWindowSizeChanged()
   local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
   Threat.tOptions.profile.tSize.nWidth = nRight - nLeft
   Threat.tOptions.profile.tSize.nHeight = nBottom - nTop
+
+  self:SetBarSlots()
 end
 
-function Main:SetupBar(wndParent, tEntry, bFirst, wndBar)
+function Main:SetupBar(wndBar, tEntry, bFirst, nHighest)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
-  local nPercent = 0
+  local nPercent = 1
   local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue, 2)
 
   -- Show the difference if enabled and not the first bar
   if not bFirst then
-    local nTop = wndParent:GetChildren()[1]:FindChild("Total"):GetData()
-    if nTop and nTop ~= nil then
-      nPercent = (tEntry.nValue / nTop) * 100
-      if Threat.tOptions.profile.bShowDifferences then
-        sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nTop - tEntry.nValue, 2)
-      end
+    nPercent = tEntry.nValue / nHighest
+    if Threat.tOptions.profile.bShowDifferences then
+      sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nHighest - tEntry.nValue, 2)
     end
-  else
-    -- This is the topmost bar.
-    nPercent = 100
   end
 
   -- Set the name string to the character name
@@ -221,7 +224,7 @@ function Main:SetupBar(wndParent, tEntry, bFirst, wndBar)
   end
 
   -- Print the total as a string with the formatted number and percentage of total. (Ex. 300k  42%)
-  wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent, "%"))
+  wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent * 100, "%"))
   wndBar:FindChild("Total"):SetData(tEntry.nValue)
 
   -- Update the progress bar with the new values and set the bar color.
@@ -230,9 +233,9 @@ function Main:SetupBar(wndParent, tEntry, bFirst, wndBar)
   local _, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
   
   if Threat.tOptions.profile.bRightToLeftBars then
-    wndBarBackground:SetAnchorPoints(1 - nPercent / 100, nTop, 1, nBottom)
+    wndBarBackground:SetAnchorPoints(1 - nPercent, nTop, 1, nBottom)
   else
-    wndBarBackground:SetAnchorPoints(0, nTop, nPercent / 100, nBottom)
+    wndBarBackground:SetAnchorPoints(0, nTop, nPercent, nBottom)
   end
   
   wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
@@ -359,16 +362,21 @@ function Main:ShowTestBars()
 
   local wndList = self.wndMain:FindChild("BarList")
 
+  self.bEnableBarUpdate = true
   self:CreateBars(wndList, #tEntries)
   self.bEnableBarUpdate = false
-
   self.nDuration = 10
-  self.nTotal = 0
-  for tIndex, tEntry in pairs(tEntries) do
-    self.nTotal = self.nTotal + tEntry.nValue
-    self:SetupBar(wndList, tEntry, tIndex == 1, wndList:GetChildren()[tIndex])
+
+  local nTopThreat = tEntries[1].nValue
+  local nBars = #wndList:GetChildren()
+
+  if nBars > 0 then
+    for tIndex, tEntry in pairs(tEntries) do
+      self:SetupBar(wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
+      if nBars == tIndex then break end
+    end
+    wndList:ArrangeChildrenVert(0, true)
   end
-  wndList:ArrangeChildrenVert(0, true)
 
   self.nLastEvent = os.time() + 5
 end
