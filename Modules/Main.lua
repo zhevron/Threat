@@ -12,6 +12,7 @@ Main.nLastEvent = 0
 Main.nBarHeight = 10
 Main.nBarSlots = 0
 Main.bEnableBarUpdate = true
+Main.wndList = nil
 
 function Main:OnInitialize()
   self.oXml = XmlDoc.CreateFromFile("Forms/Main.xml")
@@ -63,16 +64,21 @@ function Main:OnDocumentReady()
   self:UpdatePosition()
   self:UpdateLockStatus()
 
+  self.wndList = self.wndMain:FindChild("BarList")
+
   --Get Bar Size
   local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
   self.nBarHeight = wndBarTemp:GetHeight()
   wndBarTemp:Destroy()
 
   self:SetBarSlots()
+
+  --Test
+  self.wndMain:FindChild("Background"):SetBGColor(ApolloColor.new(1, 1, 1, 0.15))
 end
 
 function Main:SetBarSlots()
-  self.nBarSlots = math.floor(self.wndMain:FindChild("BarList"):GetHeight() / self.nBarHeight)
+  self.nBarSlots = math.floor(self.wndList:GetHeight() / self.nBarHeight)
 end
 
 function Main:OnTargetThreatListUpdated(...)
@@ -104,12 +110,12 @@ function Main:OnTargetThreatListUpdated(...)
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
-  self.wndMain:FindChild("BarList"):DestroyChildren()
+  self.wndList:DestroyChildren()
 end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
-    self.wndMain:FindChild("BarList"):DestroyChildren()
+    self.wndList:DestroyChildren()
     self.nDuration = 0
     self.bEnableBarUpdate = true
   else
@@ -146,22 +152,20 @@ function Main:OnUpdateTimer()
     return
   end
 
-  local wndList = self.wndMain:FindChild("BarList")
-
   --Set correct amount of bars
-  self:CreateBars(wndList, #self.tThreatList)
-  local nBars = #wndList:GetChildren()
+  self:CreateBars(self.wndList, #self.tThreatList)
+  local nBars = #self.wndList:GetChildren()
 
   --Set bar data
   if #self.tThreatList > 0 and nBars > 0 then
     local nTopThreat = self.tThreatList[1].nValue
 
     for tIndex, tEntry in ipairs(self.tThreatList) do
-      self:SetupBar(wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
+      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
       if nBars == tIndex then break end
     end
 
-    wndList:ArrangeChildrenVert(0, true)
+    self.wndList:ArrangeChildrenVert(0, true)
   end
 end
 
@@ -360,22 +364,20 @@ function Main:ShowTestBars()
     }
   }
 
-  local wndList = self.wndMain:FindChild("BarList")
-
   self.bEnableBarUpdate = true
-  self:CreateBars(wndList, #tEntries)
+  self:CreateBars(self.wndList, #tEntries)
   self.bEnableBarUpdate = false
   self.nDuration = 10
 
   local nTopThreat = tEntries[1].nValue
-  local nBars = #wndList:GetChildren()
+  local nBars = #self.wndList:GetChildren()
 
   if nBars > 0 then
     for tIndex, tEntry in pairs(tEntries) do
-      self:SetupBar(wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
+      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
       if nBars == tIndex then break end
     end
-    wndList:ArrangeChildrenVert(0, true)
+    self.wndList:ArrangeChildrenVert(0, true)
   end
 
   self.nLastEvent = os.time() + 5
