@@ -9,10 +9,15 @@ local Main = Threat:NewModule("Main")
 Main.tThreatList = {}
 Main.nDuration = 0
 Main.nLastEvent = 0
+
 Main.nBarHeight = 10
 Main.nBarSlots = 0
 Main.bEnableBarUpdate = true
+
 Main.wndList = nil
+
+Main.CanUpdate = true
+Main.UpdateAwaiting = false
 
 function Main:OnInitialize()
   self.oXml = XmlDoc.CreateFromFile("Forms/Main.xml")
@@ -26,7 +31,7 @@ function Main:OnInitialize()
   self.tCombatTimer = ApolloTimer.Create(1, true, "OnCombatTimer", self)
   self.tCombatTimer:Stop()
 
-  -- Create a timer to update the UI. We don't need to do that as often as every frame.
+  -- Create a timer to update the UI.
   self.tUpdateTimer = ApolloTimer.Create(0.5, true, "OnUpdateTimer", self)
   self.tUpdateTimer:Stop()
 end
@@ -82,6 +87,7 @@ function Main:OnTargetThreatListUpdated(...)
   self.tThreatList = {}
   self.nLastEvent = os.time()
   self.bEnableBarUpdate = true
+  self.UpdateAwaiting = true
 
   -- Create the new threat list
   for nId = 1, select("#", ...), 2 do
@@ -104,15 +110,19 @@ function Main:OnTargetThreatListUpdated(...)
       return oValue1.nValue > oValue2.nValue
     end
   )
+
+  if self.CanUpdate then
+    self:UpdateUI()
+  end
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
   self.wndList:DestroyChildren()
+  self.CanUpdate = true
 end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
-    self.wndList:DestroyChildren()
     self.nDuration = 0
     self.bEnableBarUpdate = true
   else
@@ -141,11 +151,25 @@ function Main:CreateBars(wndList, nTListNum)
 end
 
 function Main:OnUpdateTimer()
+  self.CanUpdate = true
+
+  if self.UpdateAwaiting then
+    self:UpdateUI()
+  end
+end
+
+function Main:UpdateUI()
+  self.CanUpdate = false
+  self.UpdateAwaiting = false
+
   if self.wndMain == nil then
     return
   end
 
   if not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2 then
+    if self.bEnableBarUpdate then
+      self.wndList:DestroyChildren()
+    end
     return
   end
 
