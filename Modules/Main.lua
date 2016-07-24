@@ -12,11 +12,10 @@ Main.nLastEvent = 0
 
 Main.nBarHeight = 10
 Main.nBarSlots = 0
-Main.bEnableBarUpdate = true
 
 Main.wndList = nil
 
-Main.CanUpdate = true
+Main.CanInstantUpdate = true
 Main.UpdateAwaiting = false
 
 function Main:OnInitialize()
@@ -86,7 +85,6 @@ end
 function Main:OnTargetThreatListUpdated(...)
   self.tThreatList = {}
   self.nLastEvent = os.time()
-  self.bEnableBarUpdate = true
   self.UpdateAwaiting = true
 
   -- Create the new threat list
@@ -111,20 +109,20 @@ function Main:OnTargetThreatListUpdated(...)
     end
   )
 
-  if self.CanUpdate then
+  if self.CanInstantUpdate then
     self:UpdateUI()
   end
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
   self.wndList:DestroyChildren()
-  self.CanUpdate = true
+  self.CanInstantUpdate = true
 end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
+    self.wndList:DestroyChildren()
     self.nDuration = 0
-    self.bEnableBarUpdate = true
   else
     self.nDuration = self.nDuration + 1
   end
@@ -135,7 +133,7 @@ function Main:CreateBars(wndList, nTListNum)
   local nThreatListNum = math.min(self.nBarSlots, nTListNum)
 
   --Check if needs to do any work
-  if self.bEnableBarUpdate and nListNum ~= nThreatListNum then
+  if nListNum ~= nThreatListNum then
     if nListNum > nThreatListNum then
       --If needs to remove some bars
       for nIdx = nListNum, nThreatListNum + 1, -1 do
@@ -151,15 +149,15 @@ function Main:CreateBars(wndList, nTListNum)
 end
 
 function Main:OnUpdateTimer()
-  self.CanUpdate = true
-
   if self.UpdateAwaiting then
     self:UpdateUI()
+  else
+    self.CanInstantUpdate = true
   end
 end
 
 function Main:UpdateUI()
-  self.CanUpdate = false
+  self.CanInstantUpdate = false
   self.UpdateAwaiting = false
 
   if self.wndMain == nil then
@@ -167,9 +165,6 @@ function Main:UpdateUI()
   end
 
   if not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2 then
-    if self.bEnableBarUpdate then
-      self.wndList:DestroyChildren()
-    end
     return
   end
 
@@ -186,7 +181,7 @@ function Main:UpdateUI()
       if nBars == tIndex then break end
     end
 
-    self.wndList:ArrangeChildrenVert(0, true)
+    self.wndList:ArrangeChildrenVert()
   end
 end
 
@@ -385,10 +380,8 @@ function Main:ShowTestBars()
     }
   }
 
-  self.bEnableBarUpdate = true
-  self:CreateBars(self.wndList, #tEntries)
-  self.bEnableBarUpdate = false
   self.nDuration = 10
+  self:CreateBars(self.wndList, #tEntries)
 
   local nTopThreat = tEntries[1].nValue
   local nBars = #self.wndList:GetChildren()
@@ -398,7 +391,7 @@ function Main:ShowTestBars()
       self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
       if nBars == tIndex then break end
     end
-    self.wndList:ArrangeChildrenVert(0, true)
+    self.wndList:ArrangeChildrenVert()
   end
 
   self.nLastEvent = os.time() + 5
