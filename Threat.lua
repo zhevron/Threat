@@ -25,19 +25,19 @@ local tDefaults = {
     },
     tSize = {
       nWidth = 350,
-      nHeight = 250
+      nHeight = 179
     },
     nCombatDelay = 5,
     bUseClassColors = false,
     bUseRoleColors = false,
     tColors = {
-      tSelf = { nR = 255, nG = 140, nB = 0, nA = 255 },
-      tSelfWarning = { nR = 235, nG = 27, nB = 27, nA = 255 },
-      tOthers = { nR = 13, nG = 143, nB = 211, nA = 255 },
+      tSelf = { nR = 255, nG = 125, nB = 0, nA = 255 },
+      tSelfWarning = { nR = 230, nG = 0, nB = 0, nA = 255 },
+      tOthers = { nR = 10, nG = 140, nB = 200, nA = 255 },
       tPet = { nR = 47, nG = 79, nB = 79, nA = 255 },
       tTank = { nR = 145, nG = 25, nB = 220, nA = 255 },
       tHealer = { nR = 87, nG = 156, nB = 12, nA = 255 },
-      tDamage = { nR = 13, nG = 143, nB = 211, nA = 255 },
+      tDamage = { nR = 10, nG = 140, nB = 200, nA = 255 },
       [GameLib.CodeEnumClass.Warrior] = { nR = 204, nG = 26, nB = 26, nA = 255 },
       [GameLib.CodeEnumClass.Engineer] = { nR = 240, nG = 220, nB = 0, nA = 255 },
       [GameLib.CodeEnumClass.Esper] = { nR = 26, nG = 128, nB = 179, nA = 255 },
