@@ -13,8 +13,6 @@ Main.nLastEvent = 0
 Main.nBarHeight = 10
 Main.nBarSlots = 0
 
-Main.wndList = nil
-
 Main.CanInstantUpdate = true
 Main.UpdateAwaiting = false
 
@@ -43,6 +41,10 @@ function Main:OnEnable()
     self.wndMain:Show(true)
   end
 
+  if self.wndNotify ~= nil then
+    self.wndNotify:Show(true)
+  end
+
   self.tCombatTimer:Start()
   self.tUpdateTimer:Start()
 
@@ -59,16 +61,25 @@ function Main:OnDisable()
     self.wndMain:Show(false)
   end
 
+  if self.wndNotify ~= nil then
+    self.wndNotify:Show(false)
+  end
+
   self.tCombatTimer:Stop()
   self.tUpdateTimer:Stop()
 end
 
 function Main:OnDocumentReady()
   self.wndMain = Apollo.LoadForm(self.oXml, "Threat", nil, self)
-  self:UpdatePosition()
-  self:UpdateLockStatus()
+
+  self.wndNotify = Apollo.LoadForm(self.oXml, "Notification", nil, self)
 
   self.wndList = self.wndMain:FindChild("BarList")
+  self.wndNotifier = self.wndNotify:FindChild("Notifier")
+
+  self:UpdatePosition()
+  self:UpdateNotifyPosition()
+  self:UpdateLockStatus()
 
   --Get Bar Size
   local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
@@ -116,12 +127,14 @@ end
 
 function Main:OnTargetUnitChanged(unitTarget)
   self.wndList:DestroyChildren()
+  self.wndNotifier:Show(false)
   self.CanInstantUpdate = true
 end
 
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
     self.wndList:DestroyChildren()
+    self.wndNotifier:Show(false)
     self.nDuration = 0
   else
     self.nDuration = self.nDuration + 1
@@ -170,14 +183,16 @@ function Main:UpdateUI()
 
   --Set correct amount of bars
   self:CreateBars(self.wndList, #self.tThreatList)
+
   local nBars = #self.wndList:GetChildren()
+  local oPlayer = GameLib.GetPlayerUnit()
 
   --Set bar data
   if #self.tThreatList > 0 and nBars > 0 then
     local nTopThreat = self.tThreatList[1].nValue
 
     for tIndex, tEntry in ipairs(self.tThreatList) do
-      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
+      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, oPlayer)
       if nBars == tIndex then break end
     end
 
@@ -219,7 +234,37 @@ function Main:OnWindowSizeChanged()
   self:SetBarSlots()
 end
 
-function Main:SetupBar(wndBar, tEntry, bFirst, nHighest)
+--Notify Window
+
+function Main:OnMouseEnterNotify()
+  if not Threat.tOptions.profile.bLock then
+    self.wndNotify:FindChild("Background"):Show(true)
+  end
+end
+
+function Main:OnMouseExitNotify()
+  if not Threat:GetModule("Settings").wndMain:IsShown() then
+    self.wndNotify:FindChild("Background"):Show(false)
+  end
+end
+
+function Main:OnMouseButtonUpNotify(wndHandler, wndControl, eMouseButton)
+  if eMouseButton == GameLib.CodeEnumInputMouse.Right then
+    if not Threat.tOptions.profile.bLock then
+      --Threat:GetModule("Settings"):Open()
+    end
+  end
+end
+
+function Main:OnWindowMoveNotify()
+  local nLeft, nTop = self.wndNotify:GetAnchorOffsets()
+  Threat.tOptions.profile.tNotifyPosition.nX = nLeft
+  Threat.tOptions.profile.tNotifyPosition.nY = nTop
+end
+
+--Notify Window end
+
+function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = 1
@@ -230,6 +275,47 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest)
     nPercent = tEntry.nValue / nHighest
     if Threat.tOptions.profile.bShowDifferences then
       sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nHighest - tEntry.nValue, 2)
+    end
+  end
+
+  --Notify window
+  if Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
+    if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
+      if nPercent >= 0.9 then
+        local bIsTank = false
+
+        for nIdx = 1, GroupLib.GetMemberCount() do
+          local tMemberData = GroupLib.GetGroupMember(nIdx)
+          if tMemberData.strCharacterName == tEntry.sName then
+            bIsTank = tMemberData.bTank
+            break
+          end
+        end
+        
+        if not bIsTank then
+          self.wndNotifier:Show(true)
+
+          if nPercent > 0.96 then
+            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, 1))
+            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, 0.9))
+            self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
+            if nPercent == 1 then
+              self.wndNotifier:SetText("You have the highest threat!")
+            else
+              self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
+            end
+          else
+            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, 0.6))
+            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, 0.5))
+            self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
+            self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
+          end
+        else
+          self.wndNotifier:Show(false)
+        end
+      else
+        self.wndNotifier:Show(false)
+      end
     end
   end
 
@@ -245,11 +331,10 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest)
 
   -- Print the total as a string with the formatted number and percentage of total. (Ex. 300k  42%)
   wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent * 100, "%"))
-  --wndBar:FindChild("Total"):SetData(tEntry.nValue)
 
   -- Update the progress bar with the new values and set the bar color.
   local wndBarBackground = wndBar:FindChild("Background")
-  local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst)
+  local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst, oPlayer)
   local _, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
   
   if Threat.tOptions.profile.bRightToLeftBars then
@@ -261,7 +346,7 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest)
   wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 end
 
-function Main:GetColorForEntry(tEntry, bFirst)
+function Main:GetColorForEntry(tEntry, bFirst, oPlayer)
   local tColor = nil
   local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
   local bForceSelf = false
@@ -293,8 +378,8 @@ function Main:GetColorForEntry(tEntry, bFirst)
     tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
   end
 
+  
   if Threat.tOptions.profile.bUseSelfColor or bForceSelf then
-    local oPlayer = GameLib.GetPlayerUnit()
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
       -- This unit is the current player.
       if Threat.tOptions.profile.bShowSelfWarning and bFirst ~= nil and bFirst then
@@ -320,14 +405,26 @@ function Main:UpdatePosition()
   self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
+function Main:UpdateNotifyPosition()
+  local nLeft = Threat.tOptions.profile.tNotifyPosition.nX
+  local nTop = Threat.tOptions.profile.tNotifyPosition.nY
+  local nWidth = 252
+  local nHeight = 104
+  self.wndNotify:SetAnchorOffsets(nLeft - nWidth, nTop, nLeft + nWidth, nTop + nHeight)
+end
+
 function Main:UpdateLockStatus()
   self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
   self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)
   self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+
+  self.wndNotify:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
+  self.wndNotify:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
 end
 
 function Main:ShowTestBars()
   local L = Apollo.GetPackage("Gemini:Locale-1.0").tPackage:GetLocale("Threat", true)
+  local oPlayer = GameLib.GetPlayerUnit()
   local tEntries = {
     {
       nId = 0,
@@ -358,7 +455,7 @@ function Main:ShowTestBars()
       nValue = 700000
     },
     {
-      nId = GameLib.GetPlayerUnit():GetId(),
+      nId = oPlayer:GetId(),
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Spellslinger),
       eClass = GameLib.CodeEnumClass.Spellslinger,
       bPet = false,
@@ -388,7 +485,7 @@ function Main:ShowTestBars()
 
   if nBars > 0 then
     for tIndex, tEntry in pairs(tEntries) do
-      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat)
+      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, oPlayer)
       if nBars == tIndex then break end
     end
     self.wndList:ArrangeChildrenVert()

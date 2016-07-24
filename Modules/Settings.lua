@@ -152,11 +152,13 @@ function Settings:Open()
   self:ApplyCurrent()
   self.wndMain:Show(true)
   Threat:GetModule("Main").wndMain:FindChild("Background"):Show(true)
+  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
 end
 
 function Settings:Close()
   self.wndMain:Show(false)
   Threat:GetModule("Main").wndMain:FindChild("Background"):Show(false)
+  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
 end
 
 function Settings:OnBtnProfileSelect(wndHandler, wndControl)

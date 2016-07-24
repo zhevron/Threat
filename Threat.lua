@@ -5,7 +5,7 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat",
 
 Threat.tVersion = {
   nMajor = 1,
-  nMinor = 1,
+  nMinor = 2,
   nBuild = 0
 }
 
@@ -28,6 +28,11 @@ local tDefaults = {
       nHeight = 179
     },
     nCombatDelay = 5,
+    bShowNotify = true,
+    tNotifyPosition = {
+      nX = 0,
+      nY = 300
+    },
     bUseClassColors = false,
     bUseRoleColors = false,
     tColors = {
