@@ -135,6 +135,7 @@ function Settings:ApplyCurrentNotify()
   if self.wndNotifySettings == nil then return end
 
   self.wndNotifySettings:FindChild("BtnEnableNotify"):SetCheck(Threat.tOptions.profile.bShowNotify)
+  self.wndNotifySettings:FindChild("BtnOnlyInRaidNotify"):SetCheck(Threat.tOptions.profile.bNotifyOnlyInRaid)
 
   self:SetSlider("SettingShowPercent", Threat.tOptions.profile.nShowNotifySoft * 100)
   self:SetSlider("SettingShowPercentBGAlpha", Threat.tOptions.profile.nShowNotifySoftBG * 100)
@@ -153,6 +154,10 @@ end
 
 function Settings:OnBtnNotifyEnable(wndHandler, wndControl)
   Threat.tOptions.profile.bShowNotify = wndControl:IsChecked()
+end
+
+function Settings:OnBtnNotifyOnlyRaid(wndHandler, wndControl)
+  Threat.tOptions.profile.bNotifyOnlyInRaid = wndControl:IsChecked()
 end
 
 function Settings:OnBtnNotifySettingsClose(wndHandler, wndControl)
@@ -182,6 +187,7 @@ end
 
 function Settings:OnBtnResetNotifySettings(wndHandler, wndControl)
   Threat.tOptions.profile.bShowNotify = Threat.tDefaults.profile.bShowNotify
+  Threat.tOptions.profile.bNotifyOnlyInRaid = Threat.tDefaults.profile.bNotifyOnlyInRaid
 
   Threat.tOptions.profile.nShowNotifySoft = Threat.tDefaults.profile.nShowNotifySoft
   Threat.tOptions.profile.nShowNotifySoftBG = Threat.tDefaults.profile.nShowNotifySoftBG

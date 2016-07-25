@@ -48,11 +48,12 @@ Threat.tDefaults = {
     },
     --Notify Settings
     bShowNotify = true,
-    nShowNotifySoft = 0.9,
+    bNotifyOnlyInRaid = true,
+    nShowNotifySoft = 0.88,
     nShowNotifySoftBG = 0.5,
     nShowNotifySoftText = 0.7,
     nShowNotifyHard = 0.95,
-    nShowNotifyHardBG = 1,
+    nShowNotifyHardBG = 0.95,
     nShowNotifyHardText = 1,
     tNotifyPosition = {
       nX = 0,

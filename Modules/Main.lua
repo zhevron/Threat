@@ -188,6 +188,8 @@ function Main:UpdateUI()
   end
 
   if not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2 then
+    self.wndList:DestroyChildren()
+    self.wndNotifier:Show(false)
     return
   end
 
@@ -220,14 +222,18 @@ function Main:UpdateUI()
     return
   end
 
-
   if nPlayerIndex ~= -1 and Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
+    if Threat.tOptions.profile.bNotifyOnlyInRaid and not GroupLib:InRaid() then
+      self.wndNotifier:Show(false)
+      return
+    end
+
     local tEntry = self.tThreatList[nPlayerIndex]
     local nPercent = tEntry.nValue / self.tThreatList[1].nValue
-
+    
     if nPercent >= Threat.tOptions.profile.nShowNotifySoft then
       local bIsTank = false
-    
+
       for nIdx = 1, GroupLib.GetMemberCount() do
         local tMemberData = GroupLib.GetGroupMember(nIdx)
         if tMemberData.strCharacterName == tEntry.sName then
@@ -239,12 +245,12 @@ function Main:UpdateUI()
       if not bIsTank then
         if nPercent >= Threat.tOptions.profile.nShowNotifyHard then
           if nPercent == 1 then
-            SetNotifyVisual(3, nPercent)
+            self:SetNotifyVisual(3, nPercent)
           else
-            SetNotifyVisual(2, nPercent)
+            self:SetNotifyVisual(2, nPercent)
           end
         else
-          SetNotifyVisual(1, nPercent)
+          self:SetNotifyVisual(1, nPercent)
         end
         return
       end
@@ -405,7 +411,7 @@ function Main:GetColorForEntry(tEntry, bFirst, nPlayerId)
       end
     end
     if tColor == nil then
-      tColor = tWhite
+      tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
     end
   else
     -- Use non-class colors. Defaults to white if not found.
