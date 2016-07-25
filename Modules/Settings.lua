@@ -111,9 +111,7 @@ function Settings:OnSliderUpdateRate(wndHandler, wndControl, fNewValue, fOldValu
   wndCurrSlider:FindChild("SliderOutput"):SetText(string.format("%.1f", nValue))
   Threat.tOptions.profile.nUpdateRate = nValue
 
-  if Threat:GetModule("Main").tUpdateTimer ~= nil then
-     Threat:GetModule("Main"):SetTimerUpdateRate()
-  end
+  Threat:GetModule("Main"):SetTimerUpdateRate()
 end
 
 --  Buttons
@@ -121,13 +119,12 @@ end
 --Notify Buttons
 
 function Settings:OpenNotifySettings()
-  if self.wndNotifySettings == nil then
-    self.wndNotifySettings = Apollo.LoadForm(self.oXml, "NotificationSettings", nil, self)
+  if self.wndNotifySettings ~= nil then return end
 
-    Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
+  self.wndNotifySettings = Apollo.LoadForm(self.oXml, "NotificationSettings", nil, self)
+  self:ApplyCurrentNotify()
 
-    self:ApplyCurrentNotify()
-  end
+  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
 end
 
 function Settings:OnBtnShowNotifySettings(wndHandler, wndControl)
@@ -211,32 +208,14 @@ function Settings:ResetNotifyPreview()
   end
 end
 
-function Settings:ShowNotifySoft()
-  local wndNotifier = Threat:GetModule("Main").wndNotifier
+function Settings:ShowNotifier(nProfile, nPercent)
+  local Main = Threat:GetModule("Main")
+  local wndNotifier = Main.wndNotifier
   if wndNotifier == nil then return end
 
   self.bPreview = true
-  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
-
-  wndNotifier:Show(true)
-  wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftText))
-  wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftBG))
-  wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
-  wndNotifier:SetText(string.format("Close to highest threat: %d%s", Threat.tOptions.profile.nShowNotifySoft * 100,"%"))
-end
-
-function Settings:ShowNotifyHard()
-  local wndNotifier = Threat:GetModule("Main").wndNotifier
-  if wndNotifier == nil then return end
-
-  self.bPreview = true
-  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
-
-  wndNotifier:Show(true)
-  wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardText))
-  wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardBG))
-  wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
-  wndNotifier:SetText(string.format("Close to highest threat: %d%s", Threat.tOptions.profile.nShowNotifyHard * 100,"%"))
+  Main.wndNotify:FindChild("Background"):Show(false)
+  Main:SetNotifyVisual(nProfile, nPercent)
 end
 
 --Sliders
@@ -246,7 +225,7 @@ function Settings:OnSliderShowPercent(wndHandler, wndControl, fNewValue, fOldVal
   wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
   Threat.tOptions.profile.nShowNotifySoft = fNewValue / 100
 
-  self:ShowNotifySoft()
+  self:ShowNotifier(1, Threat.tOptions.profile.nShowNotifySoft)
 end
 
 function Settings:OnSliderBGAlpha(wndHandler, wndControl, fNewValue, fOldValue)
@@ -254,7 +233,7 @@ function Settings:OnSliderBGAlpha(wndHandler, wndControl, fNewValue, fOldValue)
   wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
   Threat.tOptions.profile.nShowNotifySoftBG = fNewValue / 100
 
-  self:ShowNotifySoft()
+  self:ShowNotifier(1, Threat.tOptions.profile.nShowNotifySoft)
 end
 
 function Settings:OnSliderTextAlpha(wndHandler, wndControl, fNewValue, fOldValue)
@@ -262,7 +241,7 @@ function Settings:OnSliderTextAlpha(wndHandler, wndControl, fNewValue, fOldValue
   wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
   Threat.tOptions.profile.nShowNotifySoftText = fNewValue / 100
 
-  self:ShowNotifySoft()
+  self:ShowNotifier(1, Threat.tOptions.profile.nShowNotifySoft)
 end
 
 function Settings:OnSliderShowPercentHigh(wndHandler, wndControl, fNewValue, fOldValue)
@@ -270,7 +249,7 @@ function Settings:OnSliderShowPercentHigh(wndHandler, wndControl, fNewValue, fOl
   wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
   Threat.tOptions.profile.nShowNotifyHard = fNewValue / 100
 
-  self:ShowNotifyHard()
+  self:ShowNotifier(2, Threat.tOptions.profile.nShowNotifyHard)
 end
 
 function Settings:OnSliderBGAlphaHigh(wndHandler, wndControl, fNewValue, fOldValue)
@@ -278,7 +257,7 @@ function Settings:OnSliderBGAlphaHigh(wndHandler, wndControl, fNewValue, fOldVal
   wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
   Threat.tOptions.profile.nShowNotifyHardBG = fNewValue / 100
 
-  self:ShowNotifyHard()
+  self:ShowNotifier(2, Threat.tOptions.profile.nShowNotifyHard)
 end
 
 function Settings:OnSliderTextAlphaHigh(wndHandler, wndControl, fNewValue, fOldValue)
@@ -286,7 +265,7 @@ function Settings:OnSliderTextAlphaHigh(wndHandler, wndControl, fNewValue, fOldV
   wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
   Threat.tOptions.profile.nShowNotifyHardText = fNewValue / 100
 
-  self:ShowNotifyHard()
+  self:ShowNotifier(2, Threat.tOptions.profile.nShowNotifyHard)
 end
 
 --Notify Buttons end

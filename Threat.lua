@@ -65,7 +65,7 @@ function Threat:OnInitialize()
   self.tOptions = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, self.tDefaults)
   self.tOptions.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
   self.tOptions.RegisterCallback(self, "OnProfileCopied", "OnProfileCopied")
-  Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
+  --Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
   Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end
 

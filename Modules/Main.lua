@@ -34,6 +34,7 @@ function Main:OnInitialize()
 end
 
 function Main:SetTimerUpdateRate()
+  if self.tUpdateTimer == nil then return end
   self.tUpdateTimer:Set(Threat.tOptions.profile.nUpdateRate, true, "OnUpdateTimer")
 end
 
@@ -194,18 +195,84 @@ function Main:UpdateUI()
   self:CreateBars(self.wndList, #self.tThreatList)
 
   local nBars = #self.wndList:GetChildren()
-  local oPlayer = GameLib.GetPlayerUnit()
+  local nPlayerId = GameLib.GetPlayerUnit():GetId()
+  local nPlayerIndex = -1
 
   --Set bar data
   if #self.tThreatList > 0 and nBars > 0 then
     local nTopThreat = self.tThreatList[1].nValue
 
     for tIndex, tEntry in ipairs(self.tThreatList) do
-      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, oPlayer)
-      if nBars == tIndex then break end
+      if nBars >= tIndex then
+        self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, nPlayerId)
+      end
+
+      if nPlayerId == tEntry.nId then
+        nPlayerIndex = tIndex
+      end
     end
 
     self.wndList:ArrangeChildrenVert()
+  end
+
+  --Notification
+  if self.wndNotify == nil then
+    return
+  end
+
+
+  if nPlayerIndex ~= -1 and Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
+    local tEntry = self.tThreatList[nPlayerIndex]
+    local nPercent = tEntry.nValue / self.tThreatList[1].nValue
+
+    if nPercent >= Threat.tOptions.profile.nShowNotifySoft then
+      local bIsTank = false
+    
+      for nIdx = 1, GroupLib.GetMemberCount() do
+        local tMemberData = GroupLib.GetGroupMember(nIdx)
+        if tMemberData.strCharacterName == tEntry.sName then
+          bIsTank = tMemberData.bTank
+          break
+        end
+      end
+      
+      if not bIsTank then
+        if nPercent >= Threat.tOptions.profile.nShowNotifyHard then
+          if nPercent == 1 then
+            SetNotifyVisual(3, nPercent)
+          else
+            SetNotifyVisual(2, nPercent)
+          end
+        else
+          SetNotifyVisual(1, nPercent)
+        end
+        return
+      end
+    end
+  end
+
+  --This won't get called if there was a notify
+  self.wndNotifier:Show(false)
+end
+
+function Main:SetNotifyVisual(nProfile, nPercent)
+  self.wndNotifier:Show(true)
+
+  if nProfile == 1 then
+    self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftText))
+    self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftBG))
+    self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
+    self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
+  else
+    self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardText))
+    self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardBG))
+    self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
+
+    if nProfile == 2 then
+      self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
+    else
+      self.wndNotifier:SetText("You have the highest threat!")
+    end
   end
 end
 
@@ -273,7 +340,7 @@ end
 
 --Notify Window end
 
-function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
+function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, nPlayerId)
   -- Perform calculations for this entry.
   local nPerSecond = tEntry.nValue / self.nDuration
   local nPercent = 1
@@ -284,47 +351,6 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
     nPercent = tEntry.nValue / nHighest
     if Threat.tOptions.profile.bShowDifferences then
       sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nHighest - tEntry.nValue, 2)
-    end
-  end
-
-  --Notify window
-  if Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
-    if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
-      if nPercent >= Threat.tOptions.profile.nShowNotifySoft then
-        local bIsTank = false
-
-        for nIdx = 1, GroupLib.GetMemberCount() do
-          local tMemberData = GroupLib.GetGroupMember(nIdx)
-          if tMemberData.strCharacterName == tEntry.sName then
-            bIsTank = tMemberData.bTank
-            break
-          end
-        end
-        
-        if not bIsTank then
-          self.wndNotifier:Show(true)
-
-          if nPercent >= Threat.tOptions.profile.nShowNotifyHard then
-            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardText))
-            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardBG))
-            self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
-            if nPercent == 1 then
-              self.wndNotifier:SetText("You have the highest threat!")
-            else
-              self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
-            end
-          else
-            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftText))
-            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftBG))
-            self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
-            self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
-          end
-        else
-          self.wndNotifier:Show(false)
-        end
-      else
-        self.wndNotifier:Show(false)
-      end
     end
   end
 
@@ -343,7 +369,7 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
 
   -- Update the progress bar with the new values and set the bar color.
   local wndBarBackground = wndBar:FindChild("Background")
-  local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst, oPlayer)
+  local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst, nPlayerId)
   local _, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
   
   if Threat.tOptions.profile.bRightToLeftBars then
@@ -355,7 +381,7 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
   wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 end
 
-function Main:GetColorForEntry(tEntry, bFirst, oPlayer)
+function Main:GetColorForEntry(tEntry, bFirst, nPlayerId)
   local tColor = nil
   local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
   local bForceSelf = false
@@ -389,7 +415,7 @@ function Main:GetColorForEntry(tEntry, bFirst, oPlayer)
 
   
   if Threat.tOptions.profile.bUseSelfColor or bForceSelf then
-    if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
+    if nPlayerId == tEntry.nId then
       -- This unit is the current player.
       if Threat.tOptions.profile.bShowSelfWarning and bFirst ~= nil and bFirst then
         tColor = Threat.tOptions.profile.tColors.tSelfWarning or tWhite
@@ -433,7 +459,7 @@ end
 
 function Main:ShowTestBars()
   local L = Apollo.GetPackage("Gemini:Locale-1.0").tPackage:GetLocale("Threat", true)
-  local oPlayer = GameLib.GetPlayerUnit()
+  local nPlayerId = GameLib.GetPlayerUnit():GetId()
   local tEntries = {
     {
       nId = 0,
@@ -464,7 +490,7 @@ function Main:ShowTestBars()
       nValue = 700000
     },
     {
-      nId = oPlayer:GetId(),
+      nId = nPlayerId,
       sName = GameLib.GetClassName(GameLib.CodeEnumClass.Spellslinger),
       eClass = GameLib.CodeEnumClass.Spellslinger,
       bPet = false,
@@ -494,7 +520,7 @@ function Main:ShowTestBars()
 
   if nBars > 0 then
     for tIndex, tEntry in pairs(tEntries) do
-      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, oPlayer)
+      self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, nPlayerId)
       if nBars == tIndex then break end
     end
     self.wndList:ArrangeChildrenVert()
