@@ -20,7 +20,7 @@ Threat.tDefaults = {
     bRightToLeftBars = false,
     bLock = false,
     tPosition = {
-      nX = 100,
+      nX = 620,
       nY = 100
     },
     tSize = {
@@ -50,9 +50,9 @@ Threat.tDefaults = {
     bShowNotify = true,
     nShowNotifySoft = 0.9,
     nShowNotifySoftBG = 0.5,
-    nShowNotifySoftText = 0.6,
+    nShowNotifySoftText = 0.7,
     nShowNotifyHard = 0.95,
-    nShowNotifyHardBG = 0.9,
+    nShowNotifyHardBG = 1,
     nShowNotifyHardText = 1,
     tNotifyPosition = {
       nX = 0,
@@ -93,15 +93,24 @@ function Threat:OnSlashCommand()
 end
 
 function Threat:OnProfileReset(tOptions)
-  self:GetModule("Main"):UpdatePosition()
-  self:GetModule("Main"):UpdateLockStatus()
-  self:GetModule("Settings"):ApplyCurrent()
+  self:ReloadSettings()
 end
 
 function Threat:OnProfileCopied(db, sourceProfile)
-  self:GetModule("Main"):UpdatePosition()
-  self:GetModule("Main"):UpdateLockStatus()
-  self:GetModule("Settings"):ApplyCurrent()
+  self:ReloadSettings()
+end
+
+function Threat:ReloadSettings()
+  local Main = self:GetModule("Main")
+  local Settings = self:GetModule("Settings")
+
+  Main:UpdatePosition()
+  Main:UpdateLockStatus()
+  Settings:ApplyCurrent()
+
+  Main:UpdateNotifyPosition()
+  Settings:ResetNotifyPreview()
+  Settings:ApplyCurrentNotify()
 end
 
 function Threat:GetVersionString()

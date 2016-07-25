@@ -193,6 +193,11 @@ function Settings:OnBtnResetNotifySettings(wndHandler, wndControl)
   Threat.tOptions.profile.nShowNotifyHardBG = Threat.tDefaults.profile.nShowNotifyHardBG
   Threat.tOptions.profile.nShowNotifyHardText = Threat.tDefaults.profile.nShowNotifyHardText
 
+  self:ResetNotifyPreview()
+  self:ApplyCurrentNotify()
+end
+
+function Settings:ResetNotifyPreview()
   self.bPreview = false
   
   local wndNotifier = Threat:GetModule("Main").wndNotifier
@@ -204,8 +209,6 @@ function Settings:OnBtnResetNotifySettings(wndHandler, wndControl)
   if wndNotify ~= nil then
     wndNotify:FindChild("Background"):Show(true)
   end
-
-  self:ApplyCurrentNotify()
 end
 
 function Settings:ShowNotifySoft()
