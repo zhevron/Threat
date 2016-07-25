@@ -33,6 +33,10 @@ function Main:OnInitialize()
   self.tUpdateTimer:Stop()
 end
 
+function Main:SetTimerUpdateRate()
+  self.tUpdateTimer:Set(Threat.tOptions.profile.nUpdateRate, true, "OnUpdateTimer")
+end
+
 function Main:OnEnable()
   Apollo.RegisterEventHandler("TargetThreatListUpdated", "OnTargetThreatListUpdated", self)
   Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
@@ -44,6 +48,8 @@ function Main:OnEnable()
   if self.wndNotify ~= nil then
     self.wndNotify:Show(true)
   end
+
+  self:SetTimerUpdateRate()
 
   self.tCombatTimer:Start()
   self.tUpdateTimer:Start()

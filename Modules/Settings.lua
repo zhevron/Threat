@@ -100,6 +100,22 @@ function Settings:OnBtnRightToLeftBars(wndHandler, wndControl)
   Threat.tOptions.profile.bRightToLeftBars = wndControl:IsChecked()
 end
 
+--Slider
+
+function Settings:OnSliderUpdateRate(wndHandler, wndControl, fNewValue, fOldValue)
+  local nValue = math.floor(fNewValue * 10 + 0.5) * 0.1
+
+  if Threat.tOptions.profile.nUpdateRate == nValue then return end
+
+  local wndCurrSlider = self.wndMain:FindChild("SettingUpdateRate")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(string.format("%.1f", nValue))
+  Threat.tOptions.profile.nUpdateRate = nValue
+
+  if Threat:GetModule("Main").tUpdateTimer ~= nil then
+     Threat:GetModule("Main"):SetTimerUpdateRate()
+  end
+end
+
 --  Buttons
 
 --Notify Buttons
@@ -392,6 +408,11 @@ function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnAlwaysUseSelf"):SetCheck(Threat.tOptions.profile.bUseSelfColor)
   self.wndMain:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.bShowSelfWarning)
   self.wndMain:FindChild("BtnRightToLeftBars"):SetCheck(Threat.tOptions.profile.bRightToLeftBars)
+
+  local wndSlider = self.wndMain:FindChild("SettingUpdateRate")
+  wndSlider:FindChild("SliderBar"):SetValue(Threat.tOptions.profile.nUpdateRate)
+  wndSlider:FindChild("SliderOutput"):SetText(Threat.tOptions.profile.nUpdateRate)
+
   self:CreateColors()
 end
 

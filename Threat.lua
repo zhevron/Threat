@@ -28,6 +28,7 @@ Threat.tDefaults = {
       nHeight = 179
     },
     nCombatDelay = 5,
+    nUpdateRate = 0.5,
     bUseClassColors = false,
     bUseRoleColors = false,
     tColors = {
