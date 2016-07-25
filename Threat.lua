@@ -9,7 +9,7 @@ Threat.tVersion = {
   nBuild = 0
 }
 
-local tDefaults = {
+Threat.tDefaults = {
   profile = {
     bEnabled = true,
     bShowSolo = false,
@@ -28,11 +28,6 @@ local tDefaults = {
       nHeight = 179
     },
     nCombatDelay = 5,
-    bShowNotify = true,
-    tNotifyPosition = {
-      nX = 0,
-      nY = 300
-    },
     bUseClassColors = false,
     bUseRoleColors = false,
     tColors = {
@@ -49,12 +44,24 @@ local tDefaults = {
       [GameLib.CodeEnumClass.Medic] = { nR = 51, nG = 153, nB = 26, nA = 255 },
       [GameLib.CodeEnumClass.Spellslinger] = { nR = 230, nG = 102, nB = 0, nA = 255 },
       [GameLib.CodeEnumClass.Stalker] = { nR = 128, nG = 26, nB = 204, nA = 255 }
+    },
+    --Notify Settings
+    bShowNotify = true,
+    nShowNotifySoft = 0.9,
+    nShowNotifySoftBG = 0.5,
+    nShowNotifySoftText = 0.6,
+    nShowNotifyHard = 0.95,
+    nShowNotifyHardBG = 0.9,
+    nShowNotifyHardText = 1,
+    tNotifyPosition = {
+      nX = 0,
+      nY = 300
     }
   }
 }
 
 function Threat:OnInitialize()
-  self.tOptions = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, tDefaults)
+  self.tOptions = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, self.tDefaults)
   self.tOptions.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
   self.tOptions.RegisterCallback(self, "OnProfileCopied", "OnProfileCopied")
   Apollo.RegisterEventHandler("InterfaceMenuListHasLoaded", "OnInterfaceMenuListHasLoaded", self)
@@ -97,5 +104,5 @@ function Threat:OnProfileCopied(db, sourceProfile)
 end
 
 function Threat:GetVersionString()
-  return string.format("%d.%d.%d", self.tVersion.nMajor, self.tVersion.nMinor, self.tVersion.nBuild)
+  return string.format("Threat %d.%d.%d", self.tVersion.nMajor, self.tVersion.nMinor, self.tVersion.nBuild)
 end

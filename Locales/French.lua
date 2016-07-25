@@ -4,7 +4,7 @@ if not L then
 end
 
 L["enabled"] = "Enabled"
-L["lockWindow"] = "Lock Window"
+L["lockWindow"] = "Lock Windows"
 L["useClassColors"] = "Use Class Colors"
 L["useRoleColors"] = "Use Role Colors"
 L["showWhenSolo"] = "Show When Solo"

@@ -134,8 +134,11 @@ end
 function Main:OnCombatTimer()
   if os.time() >= (self.nLastEvent + Threat.tOptions.profile.nCombatDelay) then
     self.wndList:DestroyChildren()
-    self.wndNotifier:Show(false)
     self.nDuration = 0
+
+    if Threat:GetModule("Settings").wndNotifySettings == nil then
+      self.wndNotifier:Show(false)
+    end
   else
     self.nDuration = self.nDuration + 1
   end
@@ -243,7 +246,7 @@ function Main:OnMouseEnterNotify()
 end
 
 function Main:OnMouseExitNotify()
-  if not Threat:GetModule("Settings").wndMain:IsShown() then
+  if (not Threat:GetModule("Settings").wndMain:IsShown() and Threat:GetModule("Settings").wndNotifySettings == nil) or Threat:GetModule("Settings").bPreview then
     self.wndNotify:FindChild("Background"):Show(false)
   end
 end
@@ -251,14 +254,14 @@ end
 function Main:OnMouseButtonUpNotify(wndHandler, wndControl, eMouseButton)
   if eMouseButton == GameLib.CodeEnumInputMouse.Right then
     if not Threat.tOptions.profile.bLock then
-      --Threat:GetModule("Settings"):Open()
+      Threat:GetModule("Settings"):OpenNotifySettings()
     end
   end
 end
 
 function Main:OnWindowMoveNotify()
   local nLeft, nTop = self.wndNotify:GetAnchorOffsets()
-  Threat.tOptions.profile.tNotifyPosition.nX = nLeft
+  Threat.tOptions.profile.tNotifyPosition.nX = nLeft + 252
   Threat.tOptions.profile.tNotifyPosition.nY = nTop
 end
 
@@ -281,7 +284,7 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
   --Notify window
   if Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
     if oPlayer ~= nil and oPlayer:GetId() == tEntry.nId then
-      if nPercent >= 0.9 then
+      if nPercent >= Threat.tOptions.profile.nShowNotifySoft then
         local bIsTank = false
 
         for nIdx = 1, GroupLib.GetMemberCount() do
@@ -295,9 +298,9 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
         if not bIsTank then
           self.wndNotifier:Show(true)
 
-          if nPercent > 0.96 then
-            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, 1))
-            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, 0.9))
+          if nPercent >= Threat.tOptions.profile.nShowNotifyHard then
+            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardText))
+            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardBG))
             self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
             if nPercent == 1 then
               self.wndNotifier:SetText("You have the highest threat!")
@@ -305,8 +308,8 @@ function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, oPlayer)
               self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
             end
           else
-            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, 0.6))
-            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, 0.5))
+            self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftText))
+            self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftBG))
             self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
             self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
           end

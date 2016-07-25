@@ -5,8 +5,11 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Settings = Threat:NewModule("Settings")
 
+Settings.wndNotifySettings = nil
 Settings.wndProfiles = nil
 Settings.SelectedProfile = nil
+
+Settings.bPreview = false
 
 function Settings:OnInitialize()
   self.oXml = XmlDoc.CreateFromFile("Forms/Settings.xml")
@@ -99,6 +102,182 @@ end
 
 --  Buttons
 
+--Notify Buttons
+
+function Settings:OpenNotifySettings()
+  if self.wndNotifySettings == nil then
+    self.wndNotifySettings = Apollo.LoadForm(self.oXml, "NotificationSettings", nil, self)
+
+    Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
+
+    self:ApplyCurrentNotify()
+  end
+end
+
+function Settings:OnBtnShowNotifySettings(wndHandler, wndControl)
+  self:OpenNotifySettings()
+end
+
+function Settings:ApplyCurrentNotify()
+  if self.wndNotifySettings == nil then return end
+
+  self.wndNotifySettings:FindChild("BtnEnableNotify"):SetCheck(Threat.tOptions.profile.bShowNotify)
+
+  self:SetSlider("SettingShowPercent", Threat.tOptions.profile.nShowNotifySoft * 100)
+  self:SetSlider("SettingShowPercentBGAlpha", Threat.tOptions.profile.nShowNotifySoftBG * 100)
+  self:SetSlider("SettingShowPercentTextAlpha", Threat.tOptions.profile.nShowNotifySoftText * 100)
+
+  self:SetSlider("SettingShowHighPercent", Threat.tOptions.profile.nShowNotifyHard * 100)
+  self:SetSlider("SettingShowHighPercentBGAlpha", Threat.tOptions.profile.nShowNotifyHardBG * 100)
+  self:SetSlider("SettingShowHighPercentTextAlpha", Threat.tOptions.profile.nShowNotifyHardText * 100)
+end
+
+function Settings:SetSlider(strName, nValue)
+  local wndSlider = self.wndNotifySettings:FindChild(strName)
+  wndSlider:FindChild("SliderBar"):SetValue(nValue)
+  wndSlider:FindChild("SliderOutput"):SetText(self:ToPercent(nValue))
+end
+
+function Settings:OnBtnNotifyEnable(wndHandler, wndControl)
+  Threat.tOptions.profile.bShowNotify = wndControl:IsChecked()
+end
+
+function Settings:OnBtnNotifySettingsClose(wndHandler, wndControl)
+  if self.wndNotifySettings == nil then return end
+
+  if not self.wndMain:IsShown() then
+    Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
+  else
+    Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
+  end
+
+  self.wndNotifySettings:Destroy()
+  self.wndNotifySettings = nil
+  self.bPreview = false
+
+  local wndNotifier = Threat:GetModule("Main").wndNotifier
+  if wndNotifier ~= nil then
+    wndNotifier:Show(false)
+  end
+end
+
+function Settings:OnBtnResetNotifyPos(wndHandler, wndControl)
+  local tDefaultPos = Threat.tDefaults.profile.tNotifyPosition
+  Threat.tOptions.profile.tNotifyPosition = { nX = tDefaultPos.nX, nY = tDefaultPos.nY }
+  Threat:GetModule("Main"):UpdateNotifyPosition()
+end
+
+function Settings:OnBtnResetNotifySettings(wndHandler, wndControl)
+  Threat.tOptions.profile.bShowNotify = Threat.tDefaults.profile.bShowNotify
+
+  Threat.tOptions.profile.nShowNotifySoft = Threat.tDefaults.profile.nShowNotifySoft
+  Threat.tOptions.profile.nShowNotifySoftBG = Threat.tDefaults.profile.nShowNotifySoftBG
+  Threat.tOptions.profile.nShowNotifySoftText = Threat.tDefaults.profile.nShowNotifySoftText
+  Threat.tOptions.profile.nShowNotifyHard = Threat.tDefaults.profile.nShowNotifyHard
+  Threat.tOptions.profile.nShowNotifyHardBG = Threat.tDefaults.profile.nShowNotifyHardBG
+  Threat.tOptions.profile.nShowNotifyHardText = Threat.tDefaults.profile.nShowNotifyHardText
+
+  self.bPreview = false
+  
+  local wndNotifier = Threat:GetModule("Main").wndNotifier
+  if wndNotifier ~= nil then
+    wndNotifier:Show(false)
+  end
+
+  local wndNotify = Threat:GetModule("Main").wndNotify
+  if wndNotify ~= nil then
+    wndNotify:FindChild("Background"):Show(true)
+  end
+
+  self:ApplyCurrentNotify()
+end
+
+function Settings:ShowNotifySoft()
+  local wndNotifier = Threat:GetModule("Main").wndNotifier
+  if wndNotifier == nil then return end
+
+  self.bPreview = true
+  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
+
+  wndNotifier:Show(true)
+  wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftText))
+  wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftBG))
+  wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
+  wndNotifier:SetText(string.format("Close to highest threat: %d%s", Threat.tOptions.profile.nShowNotifySoft * 100,"%"))
+end
+
+function Settings:ShowNotifyHard()
+  local wndNotifier = Threat:GetModule("Main").wndNotifier
+  if wndNotifier == nil then return end
+
+  self.bPreview = true
+  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
+
+  wndNotifier:Show(true)
+  wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardText))
+  wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardBG))
+  wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
+  wndNotifier:SetText(string.format("Close to highest threat: %d%s", Threat.tOptions.profile.nShowNotifyHard * 100,"%"))
+end
+
+--Sliders
+
+function Settings:OnSliderShowPercent(wndHandler, wndControl, fNewValue, fOldValue)
+  local wndCurrSlider = self.wndNotifySettings:FindChild("SettingShowPercent")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+  Threat.tOptions.profile.nShowNotifySoft = fNewValue / 100
+
+  self:ShowNotifySoft()
+end
+
+function Settings:OnSliderBGAlpha(wndHandler, wndControl, fNewValue, fOldValue)
+  local wndCurrSlider = self.wndNotifySettings:FindChild("SettingShowPercentBGAlpha")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+  Threat.tOptions.profile.nShowNotifySoftBG = fNewValue / 100
+
+  self:ShowNotifySoft()
+end
+
+function Settings:OnSliderTextAlpha(wndHandler, wndControl, fNewValue, fOldValue)
+  local wndCurrSlider = self.wndNotifySettings:FindChild("SettingShowPercentTextAlpha")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+  Threat.tOptions.profile.nShowNotifySoftText = fNewValue / 100
+
+  self:ShowNotifySoft()
+end
+
+function Settings:OnSliderShowPercentHigh(wndHandler, wndControl, fNewValue, fOldValue)
+  local wndCurrSlider = self.wndNotifySettings:FindChild("SettingShowHighPercent")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+  Threat.tOptions.profile.nShowNotifyHard = fNewValue / 100
+
+  self:ShowNotifyHard()
+end
+
+function Settings:OnSliderBGAlphaHigh(wndHandler, wndControl, fNewValue, fOldValue)
+  local wndCurrSlider = self.wndNotifySettings:FindChild("SettingShowHighPercentBGAlpha")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+  Threat.tOptions.profile.nShowNotifyHardBG = fNewValue / 100
+
+  self:ShowNotifyHard()
+end
+
+function Settings:OnSliderTextAlphaHigh(wndHandler, wndControl, fNewValue, fOldValue)
+  local wndCurrSlider = self.wndNotifySettings:FindChild("SettingShowHighPercentTextAlpha")
+  wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+  Threat.tOptions.profile.nShowNotifyHardText = fNewValue / 100
+
+  self:ShowNotifyHard()
+end
+
+--Notify Buttons end
+
+function Settings:ToPercent(value)
+  return string.format("%d%s", value, "%")
+end
+
+--Notify end
+
 function Settings:OnBtnShowProfiles(wndHandler, wndControl)
   if self.wndProfiles == nil then
     local CurrentProfile = Threat.tOptions:GetCurrentProfile()
@@ -149,17 +328,28 @@ function Settings:OnColorPicker(sColor, wndControl)
 end
 
 function Settings:Open()
+  if self.wndMain == nil then return end
+
   self:ApplyCurrent()
   self.wndMain:Show(true)
   Threat:GetModule("Main").wndMain:FindChild("Background"):Show(true)
-  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
+  if not self.bPreview then
+    Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(true)
+  end
 end
 
 function Settings:Close()
+  if self.wndMain == nil then return end
+
   self.wndMain:Show(false)
   Threat:GetModule("Main").wndMain:FindChild("Background"):Show(false)
-  Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
+
+  if self.wndNotifySettings == nil then
+    Threat:GetModule("Main").wndNotify:FindChild("Background"):Show(false)
+  end
 end
+
+--Profiles
 
 function Settings:OnBtnProfileSelect(wndHandler, wndControl)
   if wndControl:IsChecked() then
@@ -187,6 +377,8 @@ function Settings:OnBtnProfilesClose(wndHandler, wndControl)
   self.wndProfiles = nil
   self.SelectedProfile = nil
 end
+
+--Profiles end
 
 function Settings:ApplyCurrent()
   self.wndMain:FindChild("BtnEnable"):SetCheck(Threat.tOptions.profile.bEnabled)
