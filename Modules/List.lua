@@ -327,3 +327,88 @@ function Main:ShowTestBars()
 
 	self.nLastEvent = os.time() + 5
 end
+
+
+--- Changes needed !!!!!!
+
+function Main:UpdateUI()
+	self.CanInstantUpdate = false
+	self.UpdateAwaiting = false
+
+	if self.wndMain == nil then
+		return
+	end
+
+	if not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2 then
+		self.wndList:DestroyChildren()
+		self.wndNotifier:Show(false)
+		return
+	end
+
+	--Set correct amount of bars
+	self:CreateBars(self.wndList, #self.tThreatList)
+
+	local nBars = #self.wndList:GetChildren()
+	local nPlayerId = GameLib.GetPlayerUnit():GetId()
+	local nPlayerIndex = -1
+
+	--Set bar data
+	if #self.tThreatList > 0 and nBars > 0 then
+		local nTopThreat = self.tThreatList[1].nValue
+
+		for tIndex, tEntry in ipairs(self.tThreatList) do
+			if nBars >= tIndex then
+				self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, nPlayerId)
+			end
+
+			if nPlayerId == tEntry.nId then
+				nPlayerIndex = tIndex
+			end
+		end
+
+		self.wndList:ArrangeChildrenVert()
+	end
+
+	--Notification
+	if self.wndNotify == nil then
+		return
+	end
+
+	if nPlayerIndex ~= -1 and Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
+		if Threat.tOptions.profile.bNotifyOnlyInRaid and not GroupLib:InRaid() then
+			self.wndNotifier:Show(false)
+			return
+		end
+
+		local tEntry = self.tThreatList[nPlayerIndex]
+		local nPercent = tEntry.nValue / self.tThreatList[1].nValue
+		
+		if nPercent >= Threat.tOptions.profile.nShowNotifySoft then
+			local bIsTank = false
+
+			for nIdx = 1, GroupLib.GetMemberCount() do
+				local tMemberData = GroupLib.GetGroupMember(nIdx)
+				if tMemberData.strCharacterName == tEntry.sName then
+					bIsTank = tMemberData.bTank
+					break
+				end
+			end
+			
+			if not bIsTank then
+				if nPercent >= Threat.tOptions.profile.nShowNotifyHard then
+					if nPercent == 1 then
+						self:SetNotifyVisual(3, nPercent)
+					else
+						self:SetNotifyVisual(2, nPercent)
+					end
+				else
+					self:SetNotifyVisual(1, nPercent)
+				end
+				return
+			end
+		end
+	end
+
+	--This won't get called if there was a notify
+	self.wndNotifier:Show(false)
+end

@@ -28,7 +28,6 @@ Threat.tDefaults = {
 			nShow = 3,
 
 			bShowDifferences = false,
-			bShowThreatPerSec = true,
 			bRightToLeftBars = false,
 
 			tPosition = {
