@@ -9,11 +9,15 @@ Notify.bActive = false
 --[[ Initial functions ]]--
 
 function Notify:OnInitialize()
+	Threat:GetModule("Main").ModuleNotify = self
+
 	self.oXml = XmlDoc.CreateFromFile("Forms/Notify.xml")
+
 	if self.oXml == nil then
 		Apollo.AddAddonErrorText(Threat, "Could not load the Threat notification window!")
 		return
 	end
+
 	self.oXml:RegisterCallback("OnDocumentReady", self)
 end
 

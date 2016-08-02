@@ -9,6 +9,7 @@ Mini.bActive = false
 --[[ Initial functions ]]--
 
 function Mini:OnInitialize()
+	Threat:GetModule("Main").ModuleMini = self
 end
 
 function Mini:OnEnable()
