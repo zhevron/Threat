@@ -14,6 +14,7 @@
   <Script Name="Modules/Main.lua"/>
   <Script Name="Modules/Settings.lua"/>
   <Script Name="Modules/Utility.lua"/>
+  <Script Name="Modules/List.lua"/>
 
   <!-- Locales -->
   <Script Name="Locales/English.lua"/>

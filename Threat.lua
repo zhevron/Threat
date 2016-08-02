@@ -4,8 +4,8 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat", true)
 
 Threat.tVersion = {
-	nMajor = 1,
-	nMinor = 2,
+	nMajor = 2,
+	nMinor = 0,
 	nBuild = 0
 }
 --[[
@@ -90,7 +90,7 @@ function Threat:OnInitialize()
 	self.tOptions = Apollo.GetPackage("Gemini:DB-1.0").tPackage:New(self, self.tDefaults)
 	self.tOptions.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
 	self.tOptions.RegisterCallback(self, "OnProfileCopied", "OnProfileCopied")
-	
+
 	Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
 end
 
