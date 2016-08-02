@@ -7,8 +7,14 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Main = Threat:NewModule("Main")
 
 Main.tThreatList = {}
-Main.CanInstantUpdate = true
-Main.UpdateAwaiting = false
+Main.bCanInstantUpdate = true
+Main.bUpdateAwaiting = false
+
+Main.ModuleList = nil
+Main.ModuleNotify = nil
+Main.ModuleMini = nil
+
+Main.bInPreview = false
 
 function Main:OnInitialize()
 	self.tUpdateTimer = ApolloTimer.Create(0.5, true, "OnUpdateTimer", self)
@@ -65,67 +71,55 @@ function Main:OnTargetThreatListUpdated(...)
 		end
 	)
 
-	if self.CanInstantUpdate then
+	if self.bCanInstantUpdate then
 		self:UpdateUI()
 	else
-		self.UpdateAwaiting = true
+		self.bUpdateAwaiting = true
 	end
 end
 
 function Main:OnTargetUnitChanged(unitTarget)
-	--self.wndList:DestroyChildren()
-	--self.wndNotifier:Show(false)
-
-	--self.CanInstantUpdate = true --Not really worked the way i wanted it to
+	self:ClearUI()
+	self.bCanInstantUpdate = true
 end
 
 function Main:OnUpdateTimer()
-	if self.UpdateAwaiting then
+	if self.bUpdateAwaiting then
 		self:UpdateUI()
 	else
-		self.CanInstantUpdate = true
+		self.bCanInstantUpdate = true
 	end
 end
 
---------------------------------
--- Work needs to be done here --
---------------------------------
 function Main:UpdateUI()
-	self.CanInstantUpdate = false
-	self.UpdateAwaiting = false
+	self.bUpdateAwaiting = false
+	self.bCanInstantUpdate = false
 
-	if self.wndMain == nil then
+	if self.bInPreview then return end
+
+	if (#self.tThreatList < 1) or (not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2) then
+		self.ClearUI()
 		return
 	end
 
-	if not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2 then
-		self.wndList:DestroyChildren()
-		self.wndNotifier:Show(false)
-		return
-	end
-
-	--Set correct amount of bars
-	self:CreateBars(self.wndList, #self.tThreatList)
-
-	local nBars = #self.wndList:GetChildren()
 	local nPlayerId = GameLib.GetPlayerUnit():GetId()
 	local nPlayerIndex = -1
 
-	--Set bar data
-	if #self.tThreatList > 0 and nBars > 0 then
-		local nTopThreat = self.tThreatList[1].nValue
+	local nTopThreatFirst = self.tThreatList[1].nValue
+	local nTopThreatSecond = self.tThreatList[2].nValue or 0
+	local nTopThreatTank = 0
 
-		for tIndex, tEntry in ipairs(self.tThreatList) do
-			if nBars >= tIndex then
-				self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, nPlayerId)
-			end
+	local bInGroup = GroupLib.InGroup()
+	local bIsPlayerTank = false
+	if bInGroup then
 
-			if nPlayerId == tEntry.nId then
-				nPlayerIndex = tIndex
-			end
+	end
+
+	for tIndex, tEntry in ipairs(self.tThreatList) do
+		if nPlayerId == tEntry.nId then
+			nPlayerIndex = tIndex
 		end
-
-		self.wndList:ArrangeChildrenVert()
+		
 	end
 
 	--Notification
@@ -170,4 +164,10 @@ function Main:UpdateUI()
 
 	--This won't get called if there was a notify
 	self.wndNotifier:Show(false)
+end
+
+function Main:ClearUI()
+	if self.bInPreview then return end
+
+	
 end
