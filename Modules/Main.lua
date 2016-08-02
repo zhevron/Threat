@@ -17,7 +17,7 @@ Main.ModuleMini = nil
 Main.bInPreview = false
 
 function Main:OnInitialize()
-	self.tUpdateTimer = ApolloTimer.Create(0.5, true, "OnUpdateTimer", self)
+	self.tUpdateTimer = ApolloTimer.Create(Threat.tOptions.profile.nUpdateRate, true, "OnUpdateTimer", self)
 	self.tUpdateTimer:Stop()
 end
 
@@ -35,7 +35,7 @@ function Main:OnEnable()
 	Apollo.RegisterEventHandler("TargetThreatListUpdated", "OnTargetThreatListUpdated", self)
 	Apollo.RegisterEventHandler("TargetUnitChanged", "OnTargetUnitChanged", self)
 
-	self:SetTimerUpdateRate()
+	self:SetUpdateTimerRate()
 	self.tUpdateTimer:Start()
 end
 
@@ -91,10 +91,13 @@ function Main:OnUpdateTimer()
 	end
 end
 
+--[[ Main UI update function ]]--
 function Main:UpdateUI()
+	-- Set variables so we know an update happened
 	self.bUpdateAwaiting = false
 	self.bCanInstantUpdate = false
 
+	-- Checks
 	if self.bInPreview then return end
 
 	if (#self.tThreatList < 1) or (not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2) then
@@ -102,8 +105,9 @@ function Main:UpdateUI()
 		return
 	end
 
-	local nPlayerId = GameLib.GetPlayerUnit():GetId()
-	local nPlayerIndex = -1
+	-- Creating variables for the UI update
+	local oPlayer = GameLib.GetPlayerUnit()
+	local nPlayerValue = 0
 
 	local nTopThreatFirst = self.tThreatList[1].nValue
 	local nTopThreatSecond = self.tThreatList[2].nValue or 0
@@ -111,63 +115,44 @@ function Main:UpdateUI()
 
 	local bInGroup = GroupLib.InGroup()
 	local bIsPlayerTank = false
+	local tTanks = {}
+
+	-- Getting tank names
 	if bInGroup then
+		for nIdx = 1, GroupLib.GetMemberCount() do
+			local tMemberData = GroupLib.GetGroupMember(nIdx)
 
-	end
+			if tMemberData.strCharacterName == oPlayer:GetName() then
+				bIsPlayerTank = tMemberData.bTank
+			end
 
-	for tIndex, tEntry in ipairs(self.tThreatList) do
-		if nPlayerId == tEntry.nId then
-			nPlayerIndex = tIndex
+			if tMemberData.bTank then
+				table.insert(tTanks, tMemberData.strCharacterName)
+			end
 		end
-		
 	end
 
-	--Notification
-	if self.wndNotify == nil then
-		return
-	end
-
-	if nPlayerIndex ~= -1 and Threat.tOptions.profile.bShowNotify and GroupLib.InGroup() then
-		if Threat.tOptions.profile.bNotifyOnlyInRaid and not GroupLib:InRaid() then
-			self.wndNotifier:Show(false)
-			return
+	-- Getting info from the tThreatList
+	for nIndex, tEntry in ipairs(self.tThreatList) do
+		if nPlayerValue == 0 and oPlayer:GetId() == tEntry.nId then
+			nPlayerValue = tEntry.nValue
 		end
 
-		local tEntry = self.tThreatList[nPlayerIndex]
-		local nPercent = tEntry.nValue / self.tThreatList[1].nValue
-		
-		if nPercent >= Threat.tOptions.profile.nShowNotifySoft then
-			local bIsTank = false
-
-			for nIdx = 1, GroupLib.GetMemberCount() do
-				local tMemberData = GroupLib.GetGroupMember(nIdx)
-				if tMemberData.strCharacterName == tEntry.sName then
-					bIsTank = tMemberData.bTank
+		if nTopThreatTank == 0 then
+			for _, strTankName in ipairs(tTanks) do
+				if tEntry.sName == strTankName then
+					nTopThreatTank = tEntry.nValue
 					break
 				end
 			end
-			
-			if not bIsTank then
-				if nPercent >= Threat.tOptions.profile.nShowNotifyHard then
-					if nPercent == 1 then
-						self:SetNotifyVisual(3, nPercent)
-					else
-						self:SetNotifyVisual(2, nPercent)
-					end
-				else
-					self:SetNotifyVisual(1, nPercent)
-				end
-				return
-			end
 		end
 	end
 
-	--This won't get called if there was a notify
-	self.wndNotifier:Show(false)
+	-- Calling UI module updates
 end
 
 function Main:ClearUI()
 	if self.bInPreview then return end
 
-	
+	-- Calling UI module clears
 end

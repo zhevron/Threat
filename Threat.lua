@@ -9,7 +9,7 @@ Threat.tVersion = {
 	nBuild = 0
 }
 --[[
-	Description to what the values mean in the settings
+	Description to what some of the values mean in the settings
 	---------------------------------------------------------------------------------------------
 	nShow: 			0 = Disabled	|| 1 = Only in Party	|| 2 = Only in Raid		|| 3 = Always
 	nColorMode: 	0 = Simple		|| 1 = Role				|| 2 = Class
@@ -21,7 +21,6 @@ Threat.tDefaults = {
 		bEnabled = true,
 		bShowSolo = false,
 		bLock = false,
-		nCombatDelay = 5,
 		nUpdateRate = 0.5,
 		
 		tList = {
@@ -80,6 +79,20 @@ Threat.tDefaults = {
 			tPosition = {
 				nX = 0,
 				nY = 300
+			}
+		},
+
+		tMini = {
+			nShow = 0,
+			bAlwaysShow = true
+
+			tPosition = {
+				nX = 620,
+				nY = 100
+			},
+			tSize = {
+				nWidth = 350,
+				nHeight = 179
 			}
 		}
 	}
