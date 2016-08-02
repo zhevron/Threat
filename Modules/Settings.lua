@@ -30,7 +30,7 @@ function Settings:OnDocumentReady()
 	local GeminiLocale = Apollo.GetPackage("Gemini:Locale-1.0").tPackage
 	local L = GeminiLocale:GetLocale("Threat", true)
 	self.wndMain = Apollo.LoadForm(self.oXml, "Settings", nil, self)
-	self.wndMain:FindChild("Version"):SetText(Threat:GetVersionString())
+	self.wndMain:FindChild("Version"):SetText(string.format("Threat %d.%d.%d", Threat.tVersion.nMajor, Threat.tVersion.nMinor, Threat.tVersion.nBuild))
 	GeminiLocale:TranslateWindow(L, self.wndMain)
 	self.wndMain:Show(false)
 end

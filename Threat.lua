@@ -146,8 +146,3 @@ function Threat:ReloadSettings()
 	Settings:ResetNotifyPreview()
 	Settings:ApplyCurrentNotify()
 end
---[[	This should be put elsewhere (or deleted??) since only the settings window uses it once
-function Threat:GetVersionString()
-	return string.format("Threat %d.%d.%d", self.tVersion.nMajor, self.tVersion.nMinor, self.tVersion.nBuild)
-end
-]]
