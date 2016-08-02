@@ -1,10 +1,10 @@
 require "Apollo"
-require "ApolloTimer"
 require "GameLib"
-require "GroupLib"
 
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Notify = Threat:NewModule("Notify")
+
+Notify.bActive = false
 
 --[[ Initial functions ]]--
 
@@ -33,29 +33,52 @@ end
 function Notify:OnDisable()
 end
 
---[[ Runtime functions ]]--
+--[[ Update and Clear ]]--
 
-----------------------------------------------------------------------------------
+function Notify:Update(bIsPlayerTank, nPlayerValue, nHighest)
+	if self.wndMain == nil then return end
 
+	if bIsPlayerTank or nPlayerValue == 0 or nHighest == 0 then self:Clear() return end
 
---[[
-	!!!
-	Stuff need to be put here
-	!!!
-]]
+	local nPercent = nPlayerValue / nHighest
+	
+	if nPercent >= Threat.tOptions.profile.tNotify.tAlert.tLow.nPercent then
+		self.bActive = true
+		self.wndMain:Show(true)
 
+		if nPercent >= Threat.tOptions.profile.tNotify.tAlert.tHigh.nPercent then
+			if nPercent >= 1 then
+				self:SetNotifyVisual(3, nPercent)
+			else
+				self:SetNotifyVisual(2, nPercent)
+			end
+		else
+			self:SetNotifyVisual(1, nPercent)
+		end
+	else
+		self:Clear()
+	end
+end
 
-function Main:SetNotifyVisual(nProfile, nPercent)
-	self.wndNotifier:Show(true)
+function Notify:Clear()
+	self.bActive = false
+	self.wndMain:Show(false)
+	self.wndNotifier:Show(false)
+end
+
+--[[ Notify setup functions ]]--
+
+function Notify:SetNotifyVisual(nProfile, nPercent)
+	local tAlert = Threat.tOptions.profile.tNotify.tAlert
 
 	if nProfile == 1 then
-		self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftText))
-		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifySoftBG))
+		self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, tAlert.tLow.nAlphaText))
+		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tLow.nAlphaBG))
 		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
 		self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
 	else
-		self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardText))
-		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, Threat.tOptions.profile.nShowNotifyHardBG))
+		self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, tAlert.tHigh.nAlphaText))
+		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tHigh.nAlphaBG))
 		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
 
 		if nProfile == 2 then
@@ -64,23 +87,29 @@ function Main:SetNotifyVisual(nProfile, nPercent)
 			self.wndNotifier:SetText("You have the highest threat!")
 		end
 	end
+
+	self.wndNotifier:Show(true)
 end
 
--- Window events
+--[[ Window events ]]--
 
-function Main:OnMouseEnterNotify()
+function Notify:OnMouseEnter()
 	if not Threat.tOptions.profile.bLock then
-		self.wndNotify:FindChild("Background"):Show(true)
+		self.wndMain:Show(true)
+		self.wndMain:FindChild("Background"):Show(true)
 	end
 end
 
-function Main:OnMouseExitNotify()
-	if (not Threat:GetModule("Settings").wndMain:IsShown() and Threat:GetModule("Settings").wndNotifySettings == nil) or Threat:GetModule("Settings").bPreview then
-		self.wndNotify:FindChild("Background"):Show(false)
+function Notify:OnMouseExit()
+	if (not Threat:GetModule("Settings").wndMain:IsShown() 
+		and Threat:GetModule("Settings").wndNotifySettings == nil)
+		 or Threat:GetModule("Settings").bPreview then
+		if not self.bActive then self.wndMain:Show(false) end
+		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
 
-function Main:OnMouseButtonUpNotify(wndHandler, wndControl, eMouseButton)
+function Notify:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right then
 		if not Threat.tOptions.profile.bLock then
 			Threat:GetModule("Settings"):OpenNotifySettings()
@@ -88,18 +117,28 @@ function Main:OnMouseButtonUpNotify(wndHandler, wndControl, eMouseButton)
 	end
 end
 
-function Main:OnWindowMoveNotify()
-	local nLeft, nTop = self.wndNotify:GetAnchorOffsets()
-	Threat.tOptions.profile.tNotifyPosition.nX = nLeft + 252
-	Threat.tOptions.profile.tNotifyPosition.nY = nTop
+function Notify:OnWindowMove()
+	local nLeft, nTop = self.wndMain:GetAnchorOffsets()
+	Threat.tOptions.profile.tNotify.tPosition.nX = nLeft + 252
+	Threat.tOptions.profile.tNotify.tPosition.nY = nTop
 end
 
---extra
+--[[ Window updaters ]]--
 
-function Main:UpdateNotifyPosition()
-	local nLeft = Threat.tOptions.profile.tNotifyPosition.nX
-	local nTop = Threat.tOptions.profile.tNotifyPosition.nY
+function Notify:UpdatePosition()
+	if self.wndMain == nil then return end
+	
+	local nLeft = Threat.tOptions.profile.tNotify.tPosition.nX
+	local nTop = Threat.tOptions.profile.tNotify.tPosition.nY
 	local nWidth = 252
 	local nHeight = 104
-	self.wndNotify:SetAnchorOffsets(nLeft - nWidth, nTop, nLeft + nWidth, nTop + nHeight)
+
+	self.wndMain:SetAnchorOffsets(nLeft - nWidth, nTop, nLeft + nWidth, nTop + nHeight)
+end
+
+function Notify:UpdateLockStatus()
+	if self.wndMain == nil then return end
+
+	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
+	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
 end

@@ -115,7 +115,7 @@ function Main:UpdateUI()
 	local oPlayer = GameLib.GetPlayerUnit()
 	local nPlayerValue = 0
 
-	local nTopThreatFirst = self.tThreatList[1].nValue
+	local nTopThreatFirst = self.tThreatList[1].nValue or 0
 	local nTopThreatSecond = self.tThreatList[2].nValue or 0
 	local nTopThreatTank = 0
 
@@ -163,6 +163,9 @@ function Main:UpdateUI()
 	end
 
 	-- Notification:
+	if self:GetShowModule(Threat.tOptions.profile.tNotify.nShow, bInGroup, bInRaid) then
+		self.ModuleNotify:Update(bIsPlayerTank, nPlayerValue, nTopThreatFirst)
+	end
 
 	-- Mini:
 end
