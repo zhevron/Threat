@@ -114,6 +114,7 @@ function Main:UpdateUI()
 	local nTopThreatTank = 0
 
 	local bInGroup = GroupLib.InGroup()
+	local bInRaid = GroupLib:InRaid()
 	local bIsPlayerTank = false
 	local tTanks = {}
 
@@ -149,6 +150,8 @@ function Main:UpdateUI()
 	end
 
 	-- Calling UI module updates
+
+	self.ModuleList:Update(self.tThreatList, oPlayer:GetId(), nTopThreatFirst)
 end
 
 function Main:ClearUI()

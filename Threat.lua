@@ -8,6 +8,7 @@ Threat.tVersion = {
 	nMinor = 0,
 	nBuild = 0
 }
+
 --[[
 	Description to what some of the values mean in the settings
 	---------------------------------------------------------------------------------------------
@@ -15,7 +16,6 @@ Threat.tVersion = {
 	nColorMode: 	0 = Simple		|| 1 = Role				|| 2 = Class
 	---------------------------------------------------------------------------------------------
 ]]
-
 Threat.tDefaults = {
 	profile = {
 		bEnabled = true,
@@ -84,7 +84,7 @@ Threat.tDefaults = {
 
 		tMini = {
 			nShow = 0,
-			bAlwaysShow = true
+			bAlwaysShow = true,
 
 			tPosition = {
 				nX = 620,
@@ -146,7 +146,7 @@ function Threat:ReloadSettings()
 	Settings:ResetNotifyPreview()
 	Settings:ApplyCurrentNotify()
 end
---[[
+--[[	This should be put elsewhere (or deleted??) since only the settings window uses it once
 function Threat:GetVersionString()
 	return string.format("Threat %d.%d.%d", self.tVersion.nMajor, self.tVersion.nMinor, self.tVersion.nBuild)
 end

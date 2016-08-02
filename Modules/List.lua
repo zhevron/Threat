@@ -6,72 +6,30 @@ require "GroupLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local List = Threat:NewModule("List")
 
+List.nBarHeight = 10
+List.nBarSlots = 0
+
+--[[ Initial functions ]]--
+
 function List:OnInitialize()
-	self.mytimer = ApolloTimer.Create(1, true, "OnTest", self)
-	self.mytimer:Start()
-end
+	self.oXml = XmlDoc.CreateFromFile("Forms/List.xml")
 
-function List:OnTest()
-		Print("Test - List Module")
-end
-
-function List:OnEnable()
-	self.mytimer:Start()
-end
-
-function List:OnDisable()
-	self.mytimer:Stop()
-end
-
---------------------------------------------------------------
-
-Main.nBarHeight = 10
-Main.nBarSlots = 0
-
-function Main:OnInitialize()
-	self.oXml = XmlDoc.CreateFromFile("Forms/Main.xml")
 	if self.oXml == nil then
-		Apollo.AddAddonErrorText(Threat, "Could not load the Threat window!")
+		Apollo.AddAddonErrorText(Threat, "Could not load the Threat list window!")
 		return
 	end
+
 	self.oXml:RegisterCallback("OnDocumentReady", self)
 end
 
-function Main:OnEnable()
-	if self.wndMain ~= nil then
-		self.wndMain:Show(true)
-	end
-
-	if self.wndNotify ~= nil then
-		self.wndNotify:Show(true)
-	end
-
-	if not Threat.tOptions.profile.bEnabled then
-		self:Disable()
-	end
-end
-
-function Main:OnDisable()
-	if self.wndMain ~= nil then
-		self.wndMain:Show(false)
-	end
-
-	if self.wndNotify ~= nil then
-		self.wndNotify:Show(false)
-	end
-end
-
-function Main:OnDocumentReady()
-	self.wndMain = Apollo.LoadForm(self.oXml, "Threat", nil, self)
-
-	self.wndNotify = Apollo.LoadForm(self.oXml, "Notification", nil, self)
-
+function List:OnDocumentReady()
+	self.wndMain = Apollo.LoadForm(self.oXml, "ThreatList", nil, self)
 	self.wndList = self.wndMain:FindChild("BarList")
-	self.wndNotifier = self.wndNotify:FindChild("Notifier")
 
 	self:UpdatePosition()
-	self:UpdateNotifyPosition()
 	self:UpdateLockStatus()
+
+	self.wndMain:Show(false)
 
 	--Get Bar Size
 	local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
@@ -81,12 +39,43 @@ function Main:OnDocumentReady()
 	self:SetBarSlots()
 end
 
-function Main:SetBarSlots()
+function List:SetBarSlots()
 	self.nBarSlots = math.floor(self.wndList:GetHeight() / self.nBarHeight)
 end
 
-function Main:CreateBars(wndList, nTListNum)
-	local nListNum = #wndList:GetChildren()
+function List:OnEnable()
+end
+
+function List:OnDisable()
+end
+
+--[[ Update and Clear ]]--
+
+function List:Update(tThreatList, nPlayerId, nHighest)
+	if self.wndMain == nil then return end
+
+	self.wndMain:Show(true)
+	self:CreateBars(#tThreatList)
+
+	local nBars = #self.wndList:GetChildren()
+
+	for nIndex, tEntry in ipairs(tThreatList) do
+		if nBars >= nIndex then
+			self:SetupBar(self.wndList:GetChildren()[nIndex], tEntry, nIndex == 1, nHighest, nPlayerId)
+		else break end
+	end
+
+	self.wndList:ArrangeChildrenVert()
+end
+
+function List:Clear()
+
+end
+
+--[[ Bar setup functions ]]--
+
+function List:CreateBars(nTListNum)
+	local nListNum = #self.wndList:GetChildren()
 	local nThreatListNum = math.min(self.nBarSlots, nTListNum)
 
 	--Check if needs to do any work
@@ -94,7 +83,7 @@ function Main:CreateBars(wndList, nTListNum)
 		if nListNum > nThreatListNum then
 			--If needs to remove some bars
 			for nIdx = nListNum, nThreatListNum + 1, -1 do
-				wndList:GetChildren()[nIdx]:Destroy()
+				self.wndList:GetChildren()[nIdx]:Destroy()
 			end
 		else
 			--If needs to create some bars
@@ -104,6 +93,107 @@ function Main:CreateBars(wndList, nTListNum)
 		end
 	end
 end
+
+function List:SetupBar(wndBar, tEntry, bFirst, nHighest, nPlayerId)
+	-- Perform calculations for this entry.
+	local nPercent = 1
+	local sValue = self:FormatNumber(tEntry.nValue, 2)
+
+	-- Show the difference if enabled and not the first bar
+	if not bFirst then
+		nPercent = tEntry.nValue / nHighest
+		if Threat.tOptions.profile.tList.bShowDifferences then
+			sValue = "-"..self:FormatNumber(nHighest - tEntry.nValue, 2)
+		end
+	end
+
+	-- Set the name string to the character name
+	wndBar:FindChild("Name"):SetText(tEntry.sName)
+
+	-- Print the total as a string with the formatted number and percentage of total. (Ex. 300k  42%)
+	wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent * 100, "%"))
+
+	-- Update the progress bar with the new values and set the bar color.
+	local wndBarBackground = wndBar:FindChild("Background")
+	local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst, nPlayerId)
+	local _, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
+	
+	if Threat.tOptions.profile.tList.bRightToLeftBars then
+		wndBarBackground:SetAnchorPoints(1 - nPercent, nTop, 1, nBottom)
+	else
+		wndBarBackground:SetAnchorPoints(0, nTop, nPercent, nBottom)
+	end
+	
+	wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
+end
+
+function List:GetColorForEntry(tEntry, bFirst, nPlayerId)
+	local tColor = nil
+	local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
+	local bForceSelfColor = false
+
+	if tEntry.bPet then
+		tColor = Threat.tOptions.profile.tList.tColors.tPet or tWhite
+	else
+		-- Determine the color of the bar based on user settings.
+		if Threat.tOptions.profile.tList.nColorMode == 2 then
+			-- Use class color. Defaults to white if not found.
+			tColor = Threat.tOptions.profile.tList.tColors[tEntry.eClass] or tWhite
+		elseif Threat.tOptions.profile.tList.nColorMode == 1 and GroupLib.InGroup() then
+			-- Use role color. Defaults to white if not found.
+			for nIdx = 1, GroupLib.GetMemberCount() do
+				local tMemberData = GroupLib.GetGroupMember(nIdx)
+				if tMemberData.strCharacterName == tEntry.sName then
+					if tMemberData.bTank then
+						tColor = Threat.tOptions.profile.tList.tColors.tTank or tWhite
+					elseif tMemberData.bHealer then
+						tColor = Threat.tOptions.profile.tList.tColors.tHealer or tWhite
+					else
+						tColor = Threat.tOptions.profile.tList.tColors.tDamage or tWhite
+					end
+				end
+			end
+
+			if tColor == nil then
+				tColor = Threat.tOptions.profile.tList.tColors.tOthers or tWhite
+			end
+		else
+			-- Use non-class colors. Defaults to white if not found.
+			bForceSelfColor = true
+			tColor = Threat.tOptions.profile.tList.tColors.tOthers or tWhite
+		end
+
+		if Threat.tOptions.profile.tList.bAlwaysUseSelfColor or bForceSelfColor then
+			if nPlayerId == tEntry.nId then
+				-- This unit is the current player.
+				if Threat.tOptions.profile.tList.bUseSelfWarning and bFirst then
+					tColor = Threat.tOptions.profile.tList.tColors.tSelfWarning or tWhite
+				else
+					tColor = Threat.tOptions.profile.tList.tColors.tSelf or tWhite
+				end
+			end
+		end
+	end
+
+	return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
+end
+
+function List:FormatNumber(nNumber, nPrecision)
+	nPrecision = nPrecision or 0
+	if nNumber >= 1000000 then
+		return string.format("%."..nPrecision.."fm", nNumber / 1000000)
+	elseif nNumber >= 10000 then
+		return string.format("%."..nPrecision.."fk", nNumber / 1000)
+	else
+		return tostring(nNumber)
+	end
+end
+
+--[[ Window events ]]--
+
+--------------------------------------------------------------------------------------------
+
+
 
 --Window Events
 
@@ -143,97 +233,7 @@ end
 
 -- Setupbar +
 
-function Main:SetupBar(wndBar, tEntry, bFirst, nHighest, nPlayerId)
-	-- Perform calculations for this entry.
-	local nPerSecond = tEntry.nValue / self.nDuration
-	local nPercent = 1
-	local sValue = Threat:GetModule("Utility"):FormatNumber(tEntry.nValue, 2)
 
-	-- Show the difference if enabled and not the first bar
-	if not bFirst then
-		nPercent = tEntry.nValue / nHighest
-		if Threat.tOptions.profile.bShowDifferences then
-			sValue = "-"..Threat:GetModule("Utility"):FormatNumber(nHighest - tEntry.nValue, 2)
-		end
-	end
-
-	-- Set the name string to the character name
-	wndBar:FindChild("Name"):SetText(tEntry.sName)
-
-	-- Print threat per second as a floating point number with a precision of 1. (Ex. 7572.2)
-	if Threat.tOptions.profile.bShowThreatPerSec then
-		wndBar:FindChild("ThreatPerSecond"):SetText(string.format("%.1f", nPerSecond))
-	else
-		wndBar:FindChild("ThreatPerSecond"):SetText("")
-	end
-
-	-- Print the total as a string with the formatted number and percentage of total. (Ex. 300k  42%)
-	wndBar:FindChild("Total"):SetText(string.format("%s  %d%s", sValue, nPercent * 100, "%"))
-
-	-- Update the progress bar with the new values and set the bar color.
-	local wndBarBackground = wndBar:FindChild("Background")
-	local nR, nG, nB, nA = self:GetColorForEntry(tEntry, bFirst, nPlayerId)
-	local _, nTop, _, nBottom = wndBarBackground:GetAnchorPoints()
-	
-	if Threat.tOptions.profile.bRightToLeftBars then
-		wndBarBackground:SetAnchorPoints(1 - nPercent, nTop, 1, nBottom)
-	else
-		wndBarBackground:SetAnchorPoints(0, nTop, nPercent, nBottom)
-	end
-	
-	wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
-end
-
-function Main:GetColorForEntry(tEntry, bFirst, nPlayerId)
-	local tColor = nil
-	local tWhite = { nR = 255, nG = 255, nB = 255, nA = 255 }
-	local bForceSelf = false
-
-	-- Determine the color of the bar based on user settings.
-	if Threat.tOptions.profile.bUseClassColors then
-		-- Use class color. Defaults to white if not found.
-		tColor = Threat.tOptions.profile.tColors[tEntry.eClass] or tWhite
-	elseif Threat.tOptions.profile.bUseRoleColors and GroupLib.InGroup() then
-		-- Use role color. Defaults to white if not found.
-		for nIdx = 1, GroupLib.GetMemberCount() do
-			local tMemberData = GroupLib.GetGroupMember(nIdx)
-			if tMemberData.strCharacterName == tEntry.sName then
-				if tMemberData.bTank then
-					tColor = Threat.tOptions.profile.tColors.tTank or tWhite
-				elseif tMemberData.bHealer then
-					tColor = Threat.tOptions.profile.tColors.tHealer or tWhite
-				else
-					tColor = Threat.tOptions.profile.tColors.tDamage or tWhite
-				end
-			end
-		end
-		if tColor == nil then
-			tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
-		end
-	else
-		-- Use non-class colors. Defaults to white if not found.
-		bForceSelf = true
-		tColor = Threat.tOptions.profile.tColors.tOthers or tWhite
-	end
-
-	
-	if Threat.tOptions.profile.bUseSelfColor or bForceSelf then
-		if nPlayerId == tEntry.nId then
-			-- This unit is the current player.
-			if Threat.tOptions.profile.bShowSelfWarning and bFirst ~= nil and bFirst then
-				tColor = Threat.tOptions.profile.tColors.tSelfWarning or tWhite
-			else
-				tColor = Threat.tOptions.profile.tColors.tSelf or tWhite
-			end
-		end
-	end
-
-	if tEntry.bPet then
-		tColor = Threat.tOptions.profile.tColors.tPet or tWhite
-	end
-
-	return (tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255)
-end
 
 -- Extra
 

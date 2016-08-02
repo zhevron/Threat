@@ -1,3 +1,43 @@
+require "Apollo"
+require "ApolloTimer"
+require "GameLib"
+require "GroupLib"
+
+local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
+local Notify = Threat:NewModule("Notify")
+
+--[[ Initial functions ]]--
+
+function Notify:OnInitialize()
+	self.oXml = XmlDoc.CreateFromFile("Forms/Notify.xml")
+	if self.oXml == nil then
+		Apollo.AddAddonErrorText(Threat, "Could not load the Threat notification window!")
+		return
+	end
+	self.oXml:RegisterCallback("OnDocumentReady", self)
+end
+
+function Notify:OnDocumentReady()
+	self.wndMain = Apollo.LoadForm(self.oXml, "Notification", nil, self)
+	self.wndNotifier = self.wndMain:FindChild("Notifier")
+
+	self:UpdatePosition()
+	self:UpdateLockStatus()
+
+	self.wndMain:Show(false)
+end
+
+function Notify:OnEnable()
+end
+
+function Notify:OnDisable()
+end
+
+--[[ Runtime functions ]]--
+
+----------------------------------------------------------------------------------
+
+
 --[[
 	!!!
 	Stuff need to be put here
