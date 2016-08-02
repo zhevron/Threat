@@ -100,6 +100,12 @@ function Main:UpdateUI()
 	-- Checks
 	if self.bInPreview then return end
 
+	if self.ModuleList == nil or self.ModuleNotify == nil or self.ModuleMini == nil then
+		Print("Addon Threat : Module load incorrect - 
+		If you see this tell to the addon creator to remove this line pls")
+		return
+	end
+
 	if (#self.tThreatList < 1) or (not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2) then
 		self.ClearUI()
 		return
@@ -113,7 +119,7 @@ function Main:UpdateUI()
 	local nTopThreatSecond = self.tThreatList[2].nValue or 0
 	local nTopThreatTank = 0
 
-	local bInGroup = GroupLib.InGroup()
+	local bInGroup = GroupLib:InGroup()
 	local bInRaid = GroupLib:InRaid()
 	local bIsPlayerTank = false
 	local tTanks = {}
@@ -149,13 +155,32 @@ function Main:UpdateUI()
 		end
 	end
 
-	-- Calling UI module updates
+	-- Calling UI module updates --
 
-	self.ModuleList:Update(self.tThreatList, oPlayer:GetId(), nTopThreatFirst)
+	-- List:
+	if self:GetShowModule(Threat.tOptions.profile.tList.nShow, bInGroup, bInRaid) then
+		self.ModuleList:Update(self.tThreatList, oPlayer:GetId(), nTopThreatFirst)
+	end
+
+	-- Notification:
+
+	-- Mini:
 end
 
 function Main:ClearUI()
 	if self.bInPreview then return end
 
 	-- Calling UI module clears
+	self.ModuleList:Clear()
+end
+
+function Main:GetShowModule(nSetting, bInGroup, bInRaid)
+	if	(nSetting == 4) or 
+		(nSetting == 1 and bInGroup) or
+		(nSetting == 2 and bInGroup and not bInRaid) or 
+		(nSetting == 3 and bInRaid) then
+		return true
+	else
+		return false
+	end
 end

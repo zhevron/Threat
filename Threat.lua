@@ -11,10 +11,10 @@ Threat.tVersion = {
 
 --[[
 	Description to what some of the values mean in the settings
-	---------------------------------------------------------------------------------------------
-	nShow: 			0 = Disabled	|| 1 = Only in Party	|| 2 = Only in Raid		|| 3 = Always
-	nColorMode: 	0 = Simple		|| 1 = Role				|| 2 = Class
-	---------------------------------------------------------------------------------------------
+	----------------------------------------------------------------------------------------------------
+	nShow: 		0 = Disabled || 1 = Only in Group || 2 = Only in Party || 3 = Only in Raid || 4 = Always
+	nColorMode: 0 = Simple	 || 1 = Role		  || 2 = Class
+	----------------------------------------------------------------------------------------------------
 ]]
 Threat.tDefaults = {
 	profile = {
@@ -24,7 +24,7 @@ Threat.tDefaults = {
 		nUpdateRate = 0.5,
 		
 		tList = {
-			nShow = 3,
+			nShow = 4,
 
 			bShowDifferences = false,
 			bRightToLeftBars = false,
@@ -61,7 +61,7 @@ Threat.tDefaults = {
 		},
 
 		tNotify = {
-			nShow = 2,
+			nShow = 3,
 
 			tAlert = {
 				tLow = {

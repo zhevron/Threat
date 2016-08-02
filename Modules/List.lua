@@ -6,6 +6,7 @@ require "GroupLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local List = Threat:NewModule("List")
 
+List.bActive = false
 List.nBarHeight = 10
 List.nBarSlots = 0
 
@@ -54,6 +55,7 @@ end
 function List:Update(tThreatList, nPlayerId, nHighest)
 	if self.wndMain == nil then return end
 
+	self.bActive = true
 	self.wndMain:Show(true)
 	self:CreateBars(#tThreatList)
 
@@ -69,7 +71,9 @@ function List:Update(tThreatList, nPlayerId, nHighest)
 end
 
 function List:Clear()
-
+	self.bActive = false
+	self.wndMain:Show(false)
+	self.wndList:DestroyChildren()
 end
 
 --[[ Bar setup functions ]]--
@@ -191,25 +195,21 @@ end
 
 --[[ Window events ]]--
 
---------------------------------------------------------------------------------------------
-
-
-
---Window Events
-
-function Main:OnMouseEnter()
+function List:OnMouseEnter()
 	if not Threat.tOptions.profile.bLock then
+		self.wndMain:Show(true)
 		self.wndMain:FindChild("Background"):Show(true)
 	end
 end
 
-function Main:OnMouseExit()
+function List:OnMouseExit()
 	if not Threat:GetModule("Settings").wndMain:IsShown() then
+		if not self.bActive then self.wndMain:Show(false) end
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
 
-function Main:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
+function List:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right then
 		if not Threat.tOptions.profile.bLock then
 			Threat:GetModule("Settings"):Open()
@@ -217,47 +217,44 @@ function Main:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	end
 end
 
-function Main:OnWindowMove()
+function List:OnWindowMove()
 	local nLeft, nTop = self.wndMain:GetAnchorOffsets()
-	Threat.tOptions.profile.tPosition.nX = nLeft
-	Threat.tOptions.profile.tPosition.nY = nTop
+	Threat.tOptions.profile.tList.tPosition.nX = nLeft
+	Threat.tOptions.profile.tList.tPosition.nY = nTop
 end
 
-function Main:OnWindowSizeChanged()
+function List:OnWindowSizeChanged()
 	local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
-	Threat.tOptions.profile.tSize.nWidth = nRight - nLeft
-	Threat.tOptions.profile.tSize.nHeight = nBottom - nTop
+	Threat.tOptions.profile.tList.tSize.nWidth = nRight - nLeft
+	Threat.tOptions.profile.tList.tSize.nHeight = nBottom - nTop
 
 	self:SetBarSlots()
 end
 
--- Setupbar +
-
-
-
--- Extra
+--[[ Window updaters ]]--
 
 function Main:UpdatePosition()
-	local nLeft = Threat.tOptions.profile.tPosition.nX
-	local nTop = Threat.tOptions.profile.tPosition.nY
-	local nWidth = Threat.tOptions.profile.tSize.nWidth
-	local nHeight = Threat.tOptions.profile.tSize.nHeight
+	if self.wndMain == nil then return end
+
+	local nLeft = Threat.tOptions.profile.tList.tPosition.nX
+	local nTop = Threat.tOptions.profile.tList.tPosition.nY
+	local nWidth = Threat.tOptions.profile.tList.tSize.nWidth
+	local nHeight = Threat.tOptions.profile.tList.tSize.nHeight
+
 	self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
 function Main:UpdateLockStatus()
+	if self.wndMain == nil then return end
+
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
-
-	self.wndNotify:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
-	self.wndNotify:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
 end
 
---User Test
+--[[ Preview ]]--
 
-function Main:ShowTestBars()
-	local L = Apollo.GetPackage("Gemini:Locale-1.0").tPackage:GetLocale("Threat", true)
+function Main:Preview()
 	local nPlayerId = GameLib.GetPlayerUnit():GetId()
 	local tEntries = {
 		{
@@ -304,30 +301,49 @@ function Main:ShowTestBars()
 		},
 		{
 			nId = 0,
-			sName = L["pet"],
+			sName = "Pet",
 			eClass = nil,
 			bPet = true,
 			nValue = 400000
 		}
 	}
 
-	self.nDuration = 10
-	self:CreateBars(self.wndList, #tEntries)
+	self:CreateBars(#tEntries)
 
-	local nTopThreat = tEntries[1].nValue
+	local nHighest = tEntries[1].nValue
 	local nBars = #self.wndList:GetChildren()
 
 	if nBars > 0 then
-		for tIndex, tEntry in pairs(tEntries) do
-			self:SetupBar(self.wndList:GetChildren()[tIndex], tEntry, tIndex == 1, nTopThreat, nPlayerId)
-			if nBars == tIndex then break end
+		for nIndex, tEntry in pairs(tEntries) do
+			self:SetupBar(self.wndList:GetChildren()[nIndex], tEntry, nIndex == 1, nHighest, nPlayerId)
+			if nBars == nIndex then break end
 		end
 		self.wndList:ArrangeChildrenVert()
 	end
-
-	self.nLastEvent = os.time() + 5
 end
 
+--------------------------------------------------------------------------------------------
+
+--[[
+
+-- Extra
+
+function Main:UpdatePosition()
+	local nLeft = Threat.tOptions.profile.tPosition.nX
+	local nTop = Threat.tOptions.profile.tPosition.nY
+	local nWidth = Threat.tOptions.profile.tSize.nWidth
+	local nHeight = Threat.tOptions.profile.tSize.nHeight
+	self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
+end
+
+function Main:UpdateLockStatus()
+	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
+	self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)
+	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+
+	self.wndNotify:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
+	self.wndNotify:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+end
 
 --- Changes needed !!!!!!
 
@@ -412,3 +428,5 @@ function Main:UpdateUI()
 	--This won't get called if there was a notify
 	self.wndNotifier:Show(false)
 end
+
+]]
