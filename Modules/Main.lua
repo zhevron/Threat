@@ -10,10 +10,6 @@ Main.tThreatList = {}
 Main.bCanInstantUpdate = true
 Main.bUpdateAwaiting = false
 
-Main.ModuleList = nil
-Main.ModuleNotify = nil
-Main.ModuleMini = nil
-
 Main.bInPreview = false
 
 function Main:OnInitialize()
@@ -100,10 +96,6 @@ function Main:UpdateUI()
 	-- Checks
 	if self.bInPreview then return end
 
-	if self.ModuleList == nil or self.ModuleNotify == nil or self.ModuleMini == nil then
-		return
-	end
-
 	if (#self.tThreatList < 1) or (not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2) then
 		self.ClearUI()
 		return
@@ -157,12 +149,12 @@ function Main:UpdateUI()
 
 	-- List:
 	if self:GetShowModule(Threat.tOptions.profile.tList.nShow, bInGroup, bInRaid) then
-		self.ModuleList:Update(self.tThreatList, oPlayer:GetId(), nTopThreatFirst)
+		Threat:GetModule("List"):Update(self.tThreatList, oPlayer:GetId(), nTopThreatFirst)
 	end
 
 	-- Notification:
 	if self:GetShowModule(Threat.tOptions.profile.tNotify.nShow, bInGroup, bInRaid) then
-		self.ModuleNotify:Update(bIsPlayerTank, nPlayerValue, nTopThreatFirst)
+		Threat:GetModule("Notify"):Update(bIsPlayerTank, nPlayerValue, nTopThreatFirst)
 	end
 
 	-- Mini:
@@ -171,13 +163,13 @@ end
 function Main:ClearUI()
 	if self.bInPreview then return end
 
-	if self.ModuleList == nil or self.ModuleNotify == nil or self.ModuleMini == nil then
+	if Threat:GetModule("List") == nil or Threat:GetModule("Notify") == nil or Threat:GetModule("Mini") == nil then
 		return
 	end
 
 	-- Calling UI module clears
-	self.ModuleList:Clear()
-	self.ModuleNotify:Clear()
+	Threat:GetModule("List"):Clear()
+	Threat:GetModule("Notify"):Clear()
 end
 
 function Main:GetShowModule(nSetting, bInGroup, bInRaid)
