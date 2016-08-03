@@ -12,8 +12,6 @@ List.nBarSlots = 0
 --[[ Initial functions ]]--
 
 function List:OnInitialize()
-	Threat:GetModule("Main").ModuleList = self
-
 	self.oXml = XmlDoc.CreateFromFile("Forms/List.xml")
 
 	if self.oXml == nil then

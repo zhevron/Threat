@@ -9,8 +9,6 @@ Notify.bActive = false
 --[[ Initial functions ]]--
 
 function Notify:OnInitialize()
-	Threat:GetModule("Main").ModuleNotify = self
-
 	self.oXml = XmlDoc.CreateFromFile("Forms/Notify.xml")
 
 	if self.oXml == nil then
