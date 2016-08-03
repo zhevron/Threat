@@ -85,6 +85,7 @@ Threat.tDefaults = {
 		tMini = {
 			nShow = 0,
 			bAlwaysShow = true,
+			bDifferenceToTank = false,
 
 			tPosition = {
 				nX = 620,

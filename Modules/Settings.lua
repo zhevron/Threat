@@ -5,6 +5,30 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Settings = Threat:NewModule("Settings")
 
+function Settings:OnInitialize()
+	self.oXml = XmlDoc.CreateFromFile("Forms/Settings.xml")
+	if self.oXml == nil then
+		Apollo.AddAddonErrorText(Threat, "Could not load the Threat window!")
+		return
+	end
+	self.oXml:RegisterCallback("OnDocumentReady", self)
+end
+
+function Settings:OnEnable()
+end
+
+function Settings:OnDisable()
+end
+
+function Settings:OnDocumentReady()
+	self.wndMain = Apollo.LoadForm(self.oXml, "Settings", nil, self)
+	self.wndMain:FindChild("TitleAddon"):SetText(string.format("Threat v%d.%d.%d", Threat.tVersion.nMajor, Threat.tVersion.nMinor, Threat.tVersion.nBuild))
+	self.wndContainer = self.wndMain:FindChild("Container")
+	self.wndMain:Show(false)
+end
+
+--[[
+
 Settings.wndNotifySettings = nil
 Settings.wndProfiles = nil
 Settings.SelectedProfile = nil
@@ -443,3 +467,4 @@ function Settings:CreateColor(wndList, pColor, pData, pText)
 		tColor.nA / 255
 	))
 end
+]]
