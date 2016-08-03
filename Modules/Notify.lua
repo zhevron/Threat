@@ -9,8 +9,6 @@ Notify.bActive = false
 --[[ Initial functions ]]--
 
 function Notify:OnInitialize()
-	Threat:GetModule("Main").ModuleNotify = self
-
 	self.oXml = XmlDoc.CreateFromFile("Forms/Notify.xml")
 
 	if self.oXml == nil then
@@ -28,11 +26,7 @@ function Notify:OnDocumentReady()
 	self:UpdatePosition()
 	self:UpdateLockStatus()
 
-	if Threat.tOptions.profile.bLock then
-		self.wndMain:Show(false)
-	else 
-		self.wndMain:Show(true)
-	end
+	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 end
 
 function Notify:OnEnable()
@@ -72,11 +66,7 @@ function Notify:Clear()
 	self.bActive = false
 	self.wndNotifier:Show(false)
 
-	if Threat.tOptions.profile.bLock then
-		self.wndMain:Show(false)
-	else 
-		self.wndMain:Show(true)
-	end
+	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 end
 
 --[[ Notify setup functions ]]--
@@ -155,11 +145,7 @@ end
 function Notify:UpdateLockStatus()
 	if self.wndMain == nil then return end
 
-	if Threat.tOptions.profile.bLock then
-		self.wndMain:Show(false)
-	else 
-		self.wndMain:Show(true)
-	end
+	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
