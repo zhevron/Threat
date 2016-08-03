@@ -31,7 +31,11 @@ function List:OnDocumentReady()
 	self:UpdatePosition()
 	self:UpdateLockStatus()
 
-	self.wndMain:Show(false)
+	if Threat.tOptions.profile.bLock then
+		self.wndMain:Show(false)
+	else 
+		self.wndMain:Show(true)
+	end
 
 	--Get Bar Size
 	local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
@@ -73,8 +77,13 @@ end
 
 function List:Clear()
 	self.bActive = false
-	self.wndMain:Show(false)
 	self.wndList:DestroyChildren()
+
+	if Threat.tOptions.profile.bLock then
+		self.wndMain:Show(false)
+	else 
+		self.wndMain:Show(true)
+	end
 end
 
 --[[ Bar setup functions ]]--
@@ -93,7 +102,7 @@ function List:CreateBars(nTListNum)
 		else
 			--If needs to create some bars
 			for nIdx = nListNum + 1, nThreatListNum do
-				Apollo.LoadForm(self.oXml, "Bar", wndList, self)
+				Apollo.LoadForm(self.oXml, "Bar", self.wndList, self)
 			end
 		end
 	end
@@ -196,16 +205,18 @@ end
 
 --[[ Window events ]]--
 
-function List:OnMouseEnter()
+function List:OnMouseEnter(wndHandler, wndControl)
+	if wndControl ~= self.wndMain then return end
+
 	if not Threat.tOptions.profile.bLock then
-		self.wndMain:Show(true)
 		self.wndMain:FindChild("Background"):Show(true)
 	end
 end
 
-function List:OnMouseExit()
+function List:OnMouseExit(wndHandler, wndControl)
+	if wndControl ~= self.wndMain then return end
+
 	if not Threat:GetModule("Settings").wndMain:IsShown() then
-		if not self.bActive then self.wndMain:Show(false) end
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
@@ -226,15 +237,16 @@ end
 
 function List:OnWindowSizeChanged()
 	local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
-	Threat.tOptions.profile.tList.tSize.nWidth = nRight - nLeft
-	Threat.tOptions.profile.tList.tSize.nHeight = nBottom - nTop
+	Threat.tOptions.profile.tList.tSize.nWidth = math.max(nRight - nLeft, 10)
+	Threat.tOptions.profile.tList.tSize.nHeight = math.max(nBottom - nTop, 10)
 
 	self:SetBarSlots()
+	self:UpdatePosition()
 end
 
 --[[ Window updaters ]]--
 
-function Main:UpdatePosition()
+function List:UpdatePosition()
 	if self.wndMain == nil then return end
 
 	local nLeft = Threat.tOptions.profile.tList.tPosition.nX
@@ -245,8 +257,14 @@ function Main:UpdatePosition()
 	self.wndMain:SetAnchorOffsets(nLeft, nTop, nLeft + nWidth, nTop + nHeight)
 end
 
-function Main:UpdateLockStatus()
+function List:UpdateLockStatus()
 	if self.wndMain == nil then return end
+
+	if Threat.tOptions.profile.bLock then
+		self.wndMain:Show(false)
+	else 
+		self.wndMain:Show(true)
+	end
 
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)
@@ -255,7 +273,7 @@ end
 
 --[[ Preview ]]--
 
-function Main:Preview()
+function List:Preview()
 	local nPlayerId = GameLib.GetPlayerUnit():GetId()
 	local tEntries = {
 		{

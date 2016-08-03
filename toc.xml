@@ -24,6 +24,7 @@
   <Script Name="Locales/French.lua"/>
 
   <!-- Forms -->
-  <Form Name="Forms/Main.xml"/>
+  <Form Name="Forms/List.xml"/>
+  <Form Name="Forms/Notify.xml"/>
   <Form Name="Forms/Settings.xml"/>
 </Addon>

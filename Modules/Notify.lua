@@ -28,7 +28,11 @@ function Notify:OnDocumentReady()
 	self:UpdatePosition()
 	self:UpdateLockStatus()
 
-	self.wndMain:Show(false)
+	if Threat.tOptions.profile.bLock then
+		self.wndMain:Show(false)
+	else 
+		self.wndMain:Show(true)
+	end
 end
 
 function Notify:OnEnable()
@@ -66,8 +70,13 @@ end
 
 function Notify:Clear()
 	self.bActive = false
-	self.wndMain:Show(false)
 	self.wndNotifier:Show(false)
+
+	if Threat.tOptions.profile.bLock then
+		self.wndMain:Show(false)
+	else 
+		self.wndMain:Show(true)
+	end
 end
 
 --[[ Notify setup functions ]]--
@@ -97,18 +106,21 @@ end
 
 --[[ Window events ]]--
 
-function Notify:OnMouseEnter()
+function Notify:OnMouseEnter(wndHandler, wndControl)
+	if wndControl ~= self.wndMain then return end
+
 	if not Threat.tOptions.profile.bLock then
-		self.wndMain:Show(true)
 		self.wndMain:FindChild("Background"):Show(true)
 	end
 end
 
-function Notify:OnMouseExit()
+function Notify:OnMouseExit(wndHandler, wndControl)
+	if wndControl ~= self.wndMain then return end
+
 	if (not Threat:GetModule("Settings").wndMain:IsShown() 
 		and Threat:GetModule("Settings").wndNotifySettings == nil)
 		 or Threat:GetModule("Settings").bPreview then
-		if not self.bActive then self.wndMain:Show(false) end
+		 
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
@@ -142,6 +154,12 @@ end
 
 function Notify:UpdateLockStatus()
 	if self.wndMain == nil then return end
+
+	if Threat.tOptions.profile.bLock then
+		self.wndMain:Show(false)
+	else 
+		self.wndMain:Show(true)
+	end
 
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)

@@ -101,8 +101,6 @@ function Main:UpdateUI()
 	if self.bInPreview then return end
 
 	if self.ModuleList == nil or self.ModuleNotify == nil or self.ModuleMini == nil then
-		Print("Addon Threat : Module load incorrect - 
-		If you see this tell to the addon creator to remove this line pls")
 		return
 	end
 
@@ -173,8 +171,13 @@ end
 function Main:ClearUI()
 	if self.bInPreview then return end
 
+	if self.ModuleList == nil or self.ModuleNotify == nil or self.ModuleMini == nil then
+		return
+	end
+
 	-- Calling UI module clears
 	self.ModuleList:Clear()
+	self.ModuleNotify:Clear()
 end
 
 function Main:GetShowModule(nSetting, bInGroup, bInRaid)
