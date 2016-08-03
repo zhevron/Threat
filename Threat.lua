@@ -114,7 +114,7 @@ function Threat:OnDisable()
 end
 
 function Threat:OnConfigure()
-	self:GetModule("Settings"):Open()
+	self:GetModule("Settings"):Open(1)
 end
 
 function Threat:OnSlashCommand()

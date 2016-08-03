@@ -13,7 +13,6 @@
   <!-- Modules -->
   <Script Name="Modules/Main.lua"/>
   <Script Name="Modules/Settings.lua"/>
-  <Script Name="Modules/Utility.lua"/>
   <Script Name="Modules/List.lua"/>
   <Script Name="Modules/Notify.lua"/>
   <Script Name="Modules/Mini.lua"/>

@@ -5,12 +5,19 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Settings = Threat:NewModule("Settings")
 
+Settings.nCurrentTab = 0
+
+--
+--	Initialzation
+--
 function Settings:OnInitialize()
 	self.oXml = XmlDoc.CreateFromFile("Forms/Settings.xml")
+
 	if self.oXml == nil then
 		Apollo.AddAddonErrorText(Threat, "Could not load the Threat window!")
 		return
 	end
+
 	self.oXml:RegisterCallback("OnDocumentReady", self)
 end
 
@@ -23,8 +30,70 @@ end
 function Settings:OnDocumentReady()
 	self.wndMain = Apollo.LoadForm(self.oXml, "Settings", nil, self)
 	self.wndMain:FindChild("TitleAddon"):SetText(string.format("Threat v%d.%d.%d", Threat.tVersion.nMajor, Threat.tVersion.nMinor, Threat.tVersion.nBuild))
-	self.wndContainer = self.wndMain:FindChild("Container")
 	self.wndMain:Show(false)
+
+	self.wndContainer = self.wndMain:FindChild("Container")
+	self.wndTabs = self.wndMain:FindChild("Navigation")
+end
+
+--
+--	Other
+--
+
+function Settings:OnClose(wndHandler, wndControl)
+	if self.wndMain == nil then return end
+
+	if not self.wndMain:IsShown() then return end
+
+	self.nCurrentTab = 0
+	self.wndMain:Show(false)
+	self.wndContainer:DestroyChildren()
+end
+
+function Settings:Open(nTab)
+	if self.wndMain == nil then return end
+
+	if self.wndMain:IsShown() then return end
+
+	self.wndTabs:FindChild("TabGeneral"):SetCheck(nTab == 1)
+	self.wndTabs:FindChild("TabList"):SetCheck(nTab == 2)
+	self.wndTabs:FindChild("TabNotify"):SetCheck(nTab == 3)
+	self.wndTabs:FindChild("TabMini"):SetCheck(nTab == 4)
+
+	self:LoadTab(nTab)
+
+	self.wndMain:Show(true)
+end
+
+function Settings:LoadTab(nTab)
+	if self.wndMain == nil or self.nCurrentTab == nTab then return end
+
+	self.wndContainer:DestroyChildren()
+	self.nCurrentTab = nTab
+
+	-- Need current settings loader
+	if nTab == 1 then
+		Apollo.LoadForm(self.oXml, "GeneralSettings", self.wndContainer, self)
+	elseif nTab == 2 then
+		Apollo.LoadForm(self.oXml, "ListSettings", self.wndContainer, self)
+	elseif nTab == 3 then
+		Apollo.LoadForm(self.oXml, "NotifySettings", self.wndContainer, self)
+	elseif nTab == 4 then
+		Apollo.LoadForm(self.oXml, "MiniSettings", self.wndContainer, self)
+	end
+end
+
+function Settings:OnTabGeneral(wndHandler, wndControl)
+	self:LoadTab(1)
+end
+function Settings:OnTabList(wndHandler, wndControl)
+	self:LoadTab(2)
+end
+function Settings:OnTabNotify(wndHandler, wndControl)
+	self:LoadTab(3)
+end
+function Settings:OnTabMini(wndHandler, wndControl)
+	self:LoadTab(4)
 end
 
 --[[
