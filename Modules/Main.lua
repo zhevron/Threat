@@ -163,10 +163,6 @@ end
 function Main:ClearUI()
 	if self.bInPreview then return end
 
-	if Threat:GetModule("List") == nil or Threat:GetModule("Notify") == nil or Threat:GetModule("Mini") == nil then
-		return
-	end
-
 	-- Calling UI module clears
 	Threat:GetModule("List"):Clear()
 	Threat:GetModule("Notify"):Clear()
