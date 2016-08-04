@@ -136,15 +136,9 @@ function Threat:OnProfileCopied(db, sourceProfile)
 end
 
 function Threat:ReloadSettings()
-	Print("Reload Settings got called")
-	--local Main = self:GetModule("Main")
-	--local Settings = self:GetModule("Settings")
+	local Main = self:GetModule("Main")
+	Main:UpdatePosition()
+	Main:UpdateLockStatus()
 
-	--Main:UpdatePosition()
-	--Main:UpdateLockStatus()
-	--Settings:ApplyCurrent()
-
-	--Main:UpdateNotifyPosition()
-	--Settings:ResetNotifyPreview()
-	--Settings:ApplyCurrentNotify()
+	self:GetModule("Settings"):GeneralApplyCurrent()
 end

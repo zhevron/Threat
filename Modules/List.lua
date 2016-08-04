@@ -51,7 +51,7 @@ end
 
 function List:Update(tThreatList, nPlayerId, nHighest)
 	if self.wndMain == nil then return end
-	
+
 	self.bActive = true
 	self:CreateBars(#tThreatList)
 
@@ -203,7 +203,7 @@ end
 function List:OnMouseExit(wndHandler, wndControl)
 	if wndControl ~= self.wndMain then return end
 
-	if not Threat:GetModule("Settings").wndMain:IsShown() then
+	if Threat:GetModule("Settings").nCurrentTab ~= 2 then
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
@@ -211,7 +211,7 @@ end
 function List:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right then
 		if not Threat.tOptions.profile.bLock then
-			Threat:GetModule("Settings"):Open()
+			Threat:GetModule("Settings"):Open(2)
 		end
 	end
 end

@@ -104,10 +104,7 @@ end
 function Notify:OnMouseExit(wndHandler, wndControl)
 	if wndControl ~= self.wndMain then return end
 
-	if (not Threat:GetModule("Settings").wndMain:IsShown() 
-		and Threat:GetModule("Settings").wndNotifySettings == nil)
-		 or Threat:GetModule("Settings").bPreview then
-		 
+	if Threat:GetModule("Settings").nCurrentTab ~= 3 then
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
@@ -115,7 +112,7 @@ end
 function Notify:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right then
 		if not Threat.tOptions.profile.bLock then
-			Threat:GetModule("Settings"):OpenNotifySettings()
+			Threat:GetModule("Settings"):Open(3)
 		end
 	end
 end

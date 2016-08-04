@@ -42,8 +42,10 @@ end
 
 function Settings:OnClose(wndHandler, wndControl)
 	if self.wndMain == nil then return end
-
 	if not self.wndMain:IsShown() then return end
+
+	Threat:GetModule("List").wndMain:FindChild("Background"):Show(false)
+	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(false)
 
 	self.nCurrentTab = 0
 	self.wndMain:Show(false)
@@ -51,9 +53,7 @@ function Settings:OnClose(wndHandler, wndControl)
 end
 
 function Settings:Open(nTab)
-	if self.wndMain == nil then return end
-
-	if self.wndMain:IsShown() then return end
+	if self.wndMain == nil or self.nCurrentTab == nTab then return end
 
 	self.wndTabs:FindChild("TabGeneral"):SetCheck(nTab == 1)
 	self.wndTabs:FindChild("TabList"):SetCheck(nTab == 2)
@@ -67,11 +67,14 @@ end
 
 function Settings:LoadTab(nTab)
 	if self.wndMain == nil or self.nCurrentTab == nTab then return end
-	
+
 	if nTab == nil then nTab = 1 end
 
 	self.wndContainer:DestroyChildren()
 	self.nCurrentTab = nTab
+
+	Threat:GetModule("List").wndMain:FindChild("Background"):Show(nTab == 2)
+	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(nTab == 3)
 
 	-- Need current settings loader
 	if nTab == 1 then
@@ -104,6 +107,8 @@ end
 --
 
 function Settings:GeneralApplyCurrent()
+	if self.nCurrentTab ~= 1 then return end
+	
 	self.wndContainer:FindChild("BtnEnable"):SetCheck(Threat.tOptions.profile.bEnabled)
 	self.wndContainer:FindChild("BtnLock"):SetCheck(Threat.tOptions.profile.bLock)
 	self.wndContainer:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.profile.bShowSolo)
