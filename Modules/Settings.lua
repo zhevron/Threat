@@ -241,6 +241,8 @@ function Settings:ListApplyCurrent()
 	self.wndContainer:FindChild("BtnRightToLeftBars"):SetCheck(Threat.tOptions.profile.tList.bRightToLeftBars)
 	self.wndContainer:FindChild("BtnAlwaysUseSelf"):SetCheck(Threat.tOptions.profile.tList.bAlwaysUseSelfColor)
 	self.wndContainer:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.tList.bUseSelfWarning)
+
+	self:CreateColors()
 end
 
 -- Radio buttons
