@@ -227,11 +227,10 @@ end
 
 function List:OnWindowSizeChanged()
 	local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
-	Threat.tOptions.profile.tList.tSize.nWidth = math.max(nRight - nLeft, 10)
-	Threat.tOptions.profile.tList.tSize.nHeight = math.max(nBottom - nTop, 10)
+	Threat.tOptions.profile.tList.tSize.nWidth = nRight - nLeft
+	Threat.tOptions.profile.tList.tSize.nHeight = nBottom - nTop
 
 	self:SetBarSlots()
-	self:UpdatePosition()
 end
 
 --[[ Window updaters ]]--
