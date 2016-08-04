@@ -37,7 +37,7 @@ function Settings:OnDocumentReady()
 end
 
 --
---	Other
+--	Open - Close - Tabs
 --
 
 function Settings:OnClose(wndHandler, wndControl)
@@ -67,6 +67,8 @@ end
 
 function Settings:LoadTab(nTab)
 	if self.wndMain == nil or self.nCurrentTab == nTab then return end
+	
+	if nTab == nil then nTab = 1 end
 
 	self.wndContainer:DestroyChildren()
 	self.nCurrentTab = nTab
@@ -74,6 +76,7 @@ function Settings:LoadTab(nTab)
 	-- Need current settings loader
 	if nTab == 1 then
 		Apollo.LoadForm(self.oXml, "GeneralSettings", self.wndContainer, self)
+		self:GeneralApplyCurrent()
 	elseif nTab == 2 then
 		Apollo.LoadForm(self.oXml, "ListSettings", self.wndContainer, self)
 	elseif nTab == 3 then
@@ -95,6 +98,89 @@ end
 function Settings:OnTabMini(wndHandler, wndControl)
 	self:LoadTab(4)
 end
+
+--
+--	Tab - General
+--
+
+function Settings:GeneralApplyCurrent()
+	self.wndContainer:FindChild("BtnEnable"):SetCheck(Threat.tOptions.profile.bEnabled)
+	self.wndContainer:FindChild("BtnLock"):SetCheck(Threat.tOptions.profile.bLock)
+	self.wndContainer:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.profile.bShowSolo)
+
+	local wndSlider = self.wndContainer:FindChild("SliderUpdateRate")
+	wndSlider:FindChild("SliderBar"):SetValue(Threat.tOptions.profile.nUpdateRate)
+	wndSlider:FindChild("SliderOutput"):SetText(Threat.tOptions.profile.nUpdateRate)
+
+	local CurrentProfile = Threat.tOptions:GetCurrentProfile()
+	self.wndContainer:FindChild("ProfileNameCurrent"):SetText(CurrentProfile)
+	self.wndContainer:FindChild("ProfileNameSelected"):SetText("")
+
+	local wndPList = self.wndContainer:FindChild("LstProfile")
+	local tProfiles = Threat.tOptions:GetProfiles()
+
+	wndPList:DestroyChildren()
+	for k,v in ipairs(tProfiles) do
+		if CurrentProfile ~= v then
+			Apollo.LoadForm(self.oXml, "ProfileListEntry", wndPList, self):SetText(v)
+		end
+	end
+	wndPList:ArrangeChildrenVert()
+end
+
+-- Buttons
+
+function Settings:OnBtnEnable(wndHandler, wndControl)
+	Threat.tOptions.profile.bEnabled = wndControl:IsChecked()
+	if wndControl:IsChecked() then
+		Threat:GetModule("Main"):Enable()
+	else
+		Threat:GetModule("Main"):Disable()
+	end
+end
+
+function Settings:OnBtnLock(wndHandler, wndControl)
+	Threat.tOptions.profile.bLock = wndControl:IsChecked()
+	Threat:GetModule("Main"):UpdateLockStatus()
+end
+
+function Settings:OnBtnShowSolo(wndHandler, wndControl)
+	Threat.tOptions.profile.bShowSolo = wndControl:IsChecked()
+end
+
+function Settings:OnSliderUpdateRate(wndHandler, wndControl, fNewValue, fOldValue)
+	local nValue = math.floor(fNewValue * 10 + 0.5) * 0.1
+
+	if Threat.tOptions.profile.nUpdateRate == nValue then return end
+
+	local wndCurrSlider = self.wndMain:FindChild("SliderUpdateRate")
+	wndCurrSlider:FindChild("SliderOutput"):SetText(string.format("%.1f", nValue))
+	Threat.tOptions.profile.nUpdateRate = nValue
+
+	Threat:GetModule("Main"):SetUpdateTimerRate()
+end
+
+-- Profiles
+
+function Settings:OnBtnProfileSelect(wndHandler, wndControl)
+	self.wndContainer:FindChild("ProfileNameSelected"):SetText(wndControl:GetText())
+end
+
+function Settings:OnBtnCopyProfile(wndHandler, wndControl)
+	local strProfile = self.wndContainer:FindChild("ProfileNameSelected"):GetText()
+
+	if strProfile ~= "" then
+		Threat.tOptions:CopyProfile(strProfile, true)
+	end
+end
+
+function Settings:OnBtnResetProfile(wndHandler, wndControl)
+	Threat.tOptions:ResetProfile()
+end
+
+--
+--	Tab - List
+--
 
 --[[
 

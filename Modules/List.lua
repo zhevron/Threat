@@ -29,8 +29,6 @@ function List:OnDocumentReady()
 	self:UpdatePosition()
 	self:UpdateLockStatus()
 
-	self.wndMain:Show(not Threat.tOptions.profile.bLock)
-
 	--Get Bar Size
 	local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
 	self.nBarHeight = wndBarTemp:GetHeight()
@@ -53,9 +51,8 @@ end
 
 function List:Update(tThreatList, nPlayerId, nHighest)
 	if self.wndMain == nil then return end
-
+	
 	self.bActive = true
-	self.wndMain:Show(true)
 	self:CreateBars(#tThreatList)
 
 	local nBars = #self.wndList:GetChildren()
@@ -70,10 +67,10 @@ function List:Update(tThreatList, nPlayerId, nHighest)
 end
 
 function List:Clear()
+	if self.wndMain == nil then return end
+
 	self.bActive = false
 	self.wndList:DestroyChildren()
-
-	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 end
 
 --[[ Bar setup functions ]]--
@@ -248,8 +245,6 @@ end
 
 function List:UpdateLockStatus()
 	if self.wndMain == nil then return end
-
-	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)

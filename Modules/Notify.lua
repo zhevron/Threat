@@ -25,8 +25,6 @@ function Notify:OnDocumentReady()
 
 	self:UpdatePosition()
 	self:UpdateLockStatus()
-
-	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 end
 
 function Notify:OnEnable()
@@ -46,7 +44,6 @@ function Notify:Update(bIsPlayerTank, nPlayerValue, nHighest)
 	
 	if nPercent >= Threat.tOptions.profile.tNotify.tAlert.tLow.nPercent then
 		self.bActive = true
-		self.wndMain:Show(true)
 
 		if nPercent >= Threat.tOptions.profile.tNotify.tAlert.tHigh.nPercent then
 			if nPercent >= 1 then
@@ -63,10 +60,10 @@ function Notify:Update(bIsPlayerTank, nPlayerValue, nHighest)
 end
 
 function Notify:Clear()
+	if self.wndMain == nil then return end
+
 	self.bActive = false
 	self.wndNotifier:Show(false)
-
-	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 end
 
 --[[ Notify setup functions ]]--
@@ -144,8 +141,6 @@ end
 
 function Notify:UpdateLockStatus()
 	if self.wndMain == nil then return end
-
-	self.wndMain:Show(not Threat.tOptions.profile.bLock)
 
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)

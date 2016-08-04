@@ -40,6 +40,7 @@ function Main:OnDisable()
 	Apollo.RemoveEventHandler("TargetUnitChanged", self)
 
 	self.tUpdateTimer:Stop()
+	self:ClearUI()
 end
 
 function Main:OnTargetThreatListUpdated(...)
@@ -97,7 +98,7 @@ function Main:UpdateUI()
 	if self.bInPreview then return end
 
 	if (#self.tThreatList < 1) or (not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2) then
-		self.ClearUI()
+		self:ClearUI()
 		return
 	end
 
@@ -105,8 +106,8 @@ function Main:UpdateUI()
 	local oPlayer = GameLib.GetPlayerUnit()
 	local nPlayerValue = 0
 
-	local nTopThreatFirst = self.tThreatList[1].nValue or 0
-	local nTopThreatSecond = self.tThreatList[2].nValue or 0
+	local nTopThreatFirst = self.tThreatList[1].nValue
+	local nTopThreatSecond = 0
 	local nTopThreatTank = 0
 
 	local bInGroup = GroupLib:InGroup()
@@ -133,6 +134,10 @@ function Main:UpdateUI()
 	for nIndex, tEntry in ipairs(self.tThreatList) do
 		if nPlayerValue == 0 and oPlayer:GetId() == tEntry.nId then
 			nPlayerValue = tEntry.nValue
+		end
+
+		if nTopThreatSecond == 0 and nIndex == 2 then
+			nTopThreatSecond = tEntry.nValue
 		end
 
 		if nTopThreatTank == 0 then
@@ -177,4 +182,9 @@ function Main:GetShowModule(nSetting, bInGroup, bInRaid)
 	else
 		return false
 	end
+end
+
+function Main:UpdateLockStatus()
+	Threat:GetModule("List"):UpdateLockStatus()
+	Threat:GetModule("Notify"):UpdateLockStatus()
 end
