@@ -6,6 +6,13 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Settings = Threat:NewModule("Settings")
 
 Settings.nCurrentTab = 0
+Settings.tModeNames = {
+	[0] = "Disabled",
+	[1] = "Only in Group",
+	[2] = "Only in Party",
+	[3] = "Only in Raid",
+	[4] = "Enabled",
+}
 
 --
 --	Initialzation
@@ -47,6 +54,8 @@ function Settings:OnClose(wndHandler, wndControl)
 	Threat:GetModule("List").wndMain:FindChild("Background"):Show(false)
 	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(false)
 
+	Threat:GetModule("Main"):ClearUI()
+
 	self.nCurrentTab = 0
 	self.wndMain:Show(false)
 	self.wndContainer:DestroyChildren()
@@ -82,10 +91,13 @@ function Settings:LoadTab(nTab)
 		self:GeneralApplyCurrent()
 	elseif nTab == 2 then
 		Apollo.LoadForm(self.oXml, "ListSettings", self.wndContainer, self)
+		self:ListApplyCurrent()
 	elseif nTab == 3 then
 		Apollo.LoadForm(self.oXml, "NotifySettings", self.wndContainer, self)
+		self:NotifyApplyCurrent()
 	elseif nTab == 4 then
 		Apollo.LoadForm(self.oXml, "MiniSettings", self.wndContainer, self)
+		self:MiniApplyCurrent()
 	end
 end
 
@@ -100,6 +112,37 @@ function Settings:OnTabNotify(wndHandler, wndControl)
 end
 function Settings:OnTabMini(wndHandler, wndControl)
 	self:LoadTab(4)
+end
+
+function Settings:OnModeDropdownOpen(wndHandler, wndControl)
+	self.wndContainer:FindChild("ModeDropDownWindow"):Show(true)
+end
+
+function Settings:OnModeDropdownClose(wndHandler, wndControl)
+	self.wndContainer:FindChild("ModeDropDownWindow"):Show(false)
+end
+
+function Settings:OnModeChange(wndHandler, wndControl)
+	local strOptionName = wndControl:GetText()
+	local nOption = 0
+
+	for k,v in ipairs(self.tModeNames) do
+		if v == strOptionName then nOption = k break end
+	end
+
+	self.wndContainer:FindChild("ModeDropDownWindow"):Show(false)
+
+	if self.nCurrentTab == 2 then
+		Threat.tOptions.profile.tList.nShow = nOption
+	elseif self.nCurrentTab == 3 then
+		Threat.tOptions.profile.tNotify.nShow = nOption
+	elseif self.nCurrentTab == 4 then
+		Threat.tOptions.profile.tMini.nShow = nOption
+	end
+
+	local wndButton = self.wndContainer:FindChild("BtnModeDropDown")
+	wndButton:SetCheck(false)
+	wndButton:SetText(strOptionName)
 end
 
 --
@@ -186,6 +229,132 @@ end
 --
 --	Tab - List
 --
+
+function Settings:ListApplyCurrent()
+	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tList.nShow])
+
+	self.wndContainer:FindChild("BtnSimpleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 0)
+	self.wndContainer:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 1)
+	self.wndContainer:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 2)
+
+	self.wndContainer:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.profile.tList.bShowDifferences)
+	self.wndContainer:FindChild("BtnRightToLeftBars"):SetCheck(Threat.tOptions.profile.tList.bRightToLeftBars)
+	self.wndContainer:FindChild("BtnAlwaysUseSelf"):SetCheck(Threat.tOptions.profile.tList.bAlwaysUseSelfColor)
+	self.wndContainer:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.tList.bUseSelfWarning)
+end
+
+-- Radio buttons
+function Settings:OnBtnSimpleColors(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.nColorMode = 0
+end
+
+function Settings:OnBtnRoleColors(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.nColorMode = 1
+end
+
+function Settings:OnBtnClassColors(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.nColorMode = 2
+end
+
+-- Checkboxes
+function Settings:OnBtnShowDifferences(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.bShowDifferences = wndControl:IsChecked()
+end
+
+function Settings:OnBtnRightToLeftBars(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.bRightToLeftBars = wndControl:IsChecked()
+end
+
+function Settings:OnBtnAlwaysUseSelf(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.bAlwaysUseSelfColor = wndControl:IsChecked()
+end
+
+function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.bUseSelfWarning = wndControl:IsChecked()
+end
+
+-- Other
+function Settings:OnBtnChoose(wndHandler, wndControl)
+	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+	local tColor = Threat.tOptions.profile.tList.tColors[wndControl:GetParent():GetData()]
+	if tColor ~= nil then
+		local sColor = GeminiColor:RGBAPercToHex(
+			tColor.nR / 255,
+			tColor.nG / 255,
+			tColor.nB / 255,
+			tColor.nA / 255
+		)
+		GeminiColor:ShowColorPicker(self, "OnColorPicker", true, sColor, wndControl:GetParent())
+	end
+end
+
+function Settings:OnColorPicker(sColor, wndControl)
+	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+	local nR, nG, nB, nA = GeminiColor:HexToRGBAPerc(sColor)
+	Threat.tOptions.profile.tList.tColors[wndControl:GetData()] = {
+		nR = nR * 255,
+		nG = nG * 255,
+		nB = nB * 255,
+		nA = nA * 255
+	}
+	wndControl:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
+end
+
+function Settings:CreateColors()
+	local wndList = self.wndContainer:FindChild("LstColor")
+	wndList:DestroyChildren()
+
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tSelf, "tSelf", "Self")
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tSelfWarning, "tSelfWarning", "Self Warning")
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tOthers, "tOthers", "Others")
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tPet, "tPet", "Pet")
+
+	Apollo.LoadForm(self.oXml, "Divider", wndList, self)
+
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tTank, "tTank", Apollo.GetString("Matching_Role_Tank"))
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tHealer, "tHealer", Apollo.GetString("Matching_Role_Healer"))
+	self:CreateColor(wndList, Threat.tOptions.profile.tList.tColors.tDamage, "tDamage", Apollo.GetString("Matching_Role_Dps"))
+
+	Apollo.LoadForm(self.oXml, "Divider", wndList, self)
+
+	for eClass, tColor in pairs(Threat.tOptions.profile.tList.tColors) do
+		if type(eClass) == "number" then
+			self:CreateColor(wndList, tColor, eClass, GameLib.GetClassName(eClass))
+		end
+	end
+
+	wndList:ArrangeChildrenVert()
+end
+
+function Settings:CreateColor(wndList, pColor, pData, pText)
+	local wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
+	local tColor = pColor
+	wndColor:SetData(pData)
+	wndColor:FindChild("Name"):SetText(pText)
+	wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+		tColor.nR / 255,
+		tColor.nG / 255,
+		tColor.nB / 255,
+		tColor.nA / 255
+	))
+end
+
+
+--
+--	Tab - Notify
+--
+
+function Settings:NotifyApplyCurrent()
+	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tNotify.nShow])
+end
+
+--
+--	Tab - Mini
+--
+
+function Settings:MiniApplyCurrent()
+	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tMini.nShow])
+end
 
 --[[
 
