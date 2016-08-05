@@ -79,6 +79,11 @@ Threat.tDefaults = {
 			tPosition = {
 				nX = 0,
 				nY = 300
+			},
+
+			tColors = {
+				tLowText = { nR = 145, nG = 25, nB = 220, nA = 255 },
+				tHighText = { nR = 145, nG = 25, nB = 220, nA = 255 }
 			}
 		},
 

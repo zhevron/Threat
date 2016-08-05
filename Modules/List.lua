@@ -209,7 +209,7 @@ end
 
 function List:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right then
-		if not Threat.tOptions.profile.bLock then
+		if not Threat.tOptions.profile.bLock or Threat:GetModule("Settings").wndMain:IsShown() then
 			Threat:GetModule("Settings"):Open(2)
 		end
 	end

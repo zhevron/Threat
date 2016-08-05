@@ -46,20 +46,30 @@ end
 --	Open - Close - Tabs
 --
 
+function Settings:ModuleSetUp(Module)
+	Module.wndMain:FindChild("Background"):Show(true)
+	Module.wndMain:SetStyle("IgnoreMouse", false)
+end
+
+function Settings:ModuleSetBack(Module, Num)
+	Module.wndMain:FindChild("Background"):Show(false)
+	Module.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+	Module.bInPreview = false
+
+	if self.nCurrentTab == Num then Module:Clear() end
+end
+
+function Settings:ModuleTabChange(Module, Num, nTab)
+	Module.bInPreview = (nTab == Num)
+	if nTab ~= Num and self.nCurrentTab == Num then Module:Clear() end
+end
+
 function Settings:OnClose(wndHandler, wndControl)
 	if self.wndMain == nil then return end
 	if not self.wndMain:IsShown() then return end
 
-	local ModuleList = Threat:GetModule("List")
-	local ModuleNotify = Threat:GetModule("Notify")
-
-	ModuleList.wndMain:FindChild("Background"):Show(false)
-	ModuleList.bInPreview = false
-	ModuleNotify.wndMain:FindChild("Background"):Show(false)
-	ModuleNotify.bInPreview = false
-
-	if self.nCurrentTab == 2 then ModuleList:Clear() end
-	if self.nCurrentTab == 3 then ModuleNotify:Clear() end
+	self:ModuleSetBack(Threat:GetModule("List"), 2)
+	self:ModuleSetBack(Threat:GetModule("Notify"), 3)
 
 	self.nCurrentTab = 0
 	self.wndMain:Show(false)
@@ -69,8 +79,8 @@ end
 function Settings:Open(nTab)
 	if self.wndMain == nil or self.nCurrentTab == nTab then return end
 
-	Threat:GetModule("List").wndMain:FindChild("Background"):Show(true)
-	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(true)
+	self:ModuleSetUp(Threat:GetModule("List"))
+	self:ModuleSetUp(Threat:GetModule("Notify"))
 
 	local wndTabs = self.wndMain:FindChild("Navigation")
 
@@ -89,13 +99,8 @@ function Settings:LoadTab(nTab)
 
 	if nTab == nil then nTab = 1 end
 
-	local ModuleList = Threat:GetModule("List")
-	local ModuleNotify = Threat:GetModule("Notify")
-
-	ModuleList.bInPreview = (nTab == 2)
-	if nTab ~= 2 and self.nCurrentTab == 2 then ModuleList:Clear() end
-	ModuleNotify.bInPreview = (nTab == 3)
-	if nTab ~= 3 and self.nCurrentTab == 3 then ModuleNotify:Clear() end
+	self:ModuleTabChange(Threat:GetModule("List"), 2, nTab)
+	self:ModuleTabChange(Threat:GetModule("Notify"), 3, nTab)
 
 	self.wndContainer:DestroyChildren()
 	self.nCurrentTab = nTab
@@ -109,7 +114,6 @@ function Settings:LoadTab(nTab)
 	elseif nTab == 3 then
 		Apollo.LoadForm(self.oXml, "NotifySettings", self.wndContainer, self)
 		self:NotifyApplyCurrent()
-		--ModuleNotify:Preview()
 	elseif nTab == 4 then
 		Apollo.LoadForm(self.oXml, "MiniSettings", self.wndContainer, self)
 		self:MiniApplyCurrent()
@@ -249,8 +253,8 @@ function Settings:ListApplyCurrent()
 	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tList.nShow])
 
 	self.wndContainer:FindChild("BtnSimpleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 0)
-	self.wndContainer:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 1)
-	self.wndContainer:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 2)
+	self.wndContainer:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 1)
+	self.wndContainer:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 2)
 
 	self.wndContainer:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.profile.tList.bShowDifferences)
 	self.wndContainer:FindChild("BtnRightToLeftBars"):SetCheck(Threat.tOptions.profile.tList.bRightToLeftBars)
@@ -300,34 +304,6 @@ function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
 end
 
 -- Other
-function Settings:OnBtnChoose(wndHandler, wndControl)
-	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
-	local tColor = Threat.tOptions.profile.tList.tColors[wndControl:GetParent():GetData()]
-	if tColor ~= nil then
-		local sColor = GeminiColor:RGBAPercToHex(
-			tColor.nR / 255,
-			tColor.nG / 255,
-			tColor.nB / 255,
-			tColor.nA / 255
-		)
-		GeminiColor:ShowColorPicker(self, "OnColorPickerList", true, sColor, wndControl:GetParent())
-	end
-end
-
-function Settings:OnColorPickerList(sColor, wndControl)
-	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
-	local nR, nG, nB, nA = GeminiColor:HexToRGBAPerc(sColor)
-	Threat.tOptions.profile.tList.tColors[wndControl:GetData()] = {
-		nR = nR * 255,
-		nG = nG * 255,
-		nB = nB * 255,
-		nA = nA * 255
-	}
-	wndControl:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
-
-	Threat:GetModule("List"):PreviewColor()
-end
-
 function Settings:CreateColors()
 	local wndList = self.wndContainer:FindChild("LstColor")
 	wndList:DestroyChildren()
@@ -385,6 +361,47 @@ end
 --
 --	Other
 --
+
+function Settings:OnBtnChoose(wndHandler, wndControl)
+	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+	local ColorName = wndControl:GetParent():GetData()
+	local tColor = nil
+	
+	if self.nCurrentTab == 2 then
+		tColor = Threat.tOptions.profile.tList.tColors[ColorName]
+	elseif self.nCurrentTab == 3 then
+		tColor = Threat.tOptions.profile.tNotify.tColors[ColorName]
+	end
+
+	if tColor ~= nil then
+		local sColor = GeminiColor:RGBAPercToHex(
+			tColor.nR / 255,
+			tColor.nG / 255,
+			tColor.nB / 255,
+			tColor.nA / 255
+		)
+		GeminiColor:ShowColorPicker(self, "OnColorPicker", true, sColor, wndControl:GetParent())
+	end
+end
+
+function Settings:OnColorPicker(sColor, wndControl)
+	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
+	local nR, nG, nB, nA = GeminiColor:HexToRGBAPerc(sColor)
+	local tColor = {
+		nR = nR * 255,
+		nG = nG * 255,
+		nB = nB * 255,
+		nA = nA * 255
+	}
+	wndControl:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
+
+	if self.nCurrentTab == 2 then
+		Threat.tOptions.profile.tList.tColors[wndControl:GetData()] = tColor
+		Threat:GetModule("List"):PreviewColor()
+	elseif self.nCurrentTab == 3 then
+		Threat.tOptions.profile.tNotify.tColors[wndControl:GetData()] = tColor
+	end
+end
 
 function Settings:CreateColor(wndParent, pColor, pData, pText)
 	local wndColor = Apollo.LoadForm(self.oXml, "Color", wndParent, self)
