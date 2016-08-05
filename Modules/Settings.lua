@@ -50,11 +50,16 @@ function Settings:OnClose(wndHandler, wndControl)
 	if self.wndMain == nil then return end
 	if not self.wndMain:IsShown() then return end
 
-	Threat:GetModule("List").wndMain:FindChild("Background"):Show(false)
-	Threat:GetModule("List").bInPreview = false
-	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(false)
+	local ModuleList = Threat:GetModule("List")
+	local ModuleNotify = Threat:GetModule("Notify")
 
-	Threat:GetModule("Main"):ClearUI()
+	ModuleList.wndMain:FindChild("Background"):Show(false)
+	ModuleList.bInPreview = false
+	ModuleNotify.wndMain:FindChild("Background"):Show(false)
+	ModuleNotify.bInPreview = false
+
+	if self.nCurrentTab == 2 then ModuleList:Clear() end
+	if self.nCurrentTab == 3 then ModuleNotify:Clear() end
 
 	self.nCurrentTab = 0
 	self.wndMain:Show(false)
@@ -84,23 +89,27 @@ function Settings:LoadTab(nTab)
 
 	if nTab == nil then nTab = 1 end
 
-	Threat:GetModule("List").bInPreview = (nTab == 2)
-	if nTab ~= 2 and self.nCurrentTab == 2 then Threat:GetModule("List"):Clear() end
+	local ModuleList = Threat:GetModule("List")
+	local ModuleNotify = Threat:GetModule("Notify")
+
+	ModuleList.bInPreview = (nTab == 2)
+	if nTab ~= 2 and self.nCurrentTab == 2 then ModuleList:Clear() end
+	ModuleNotify.bInPreview = (nTab == 3)
+	if nTab ~= 3 and self.nCurrentTab == 3 then ModuleNotify:Clear() end
 
 	self.wndContainer:DestroyChildren()
 	self.nCurrentTab = nTab
 
-	-- Need current settings loader
 	if nTab == 1 then
 		Apollo.LoadForm(self.oXml, "GeneralSettings", self.wndContainer, self)
 		self:GeneralApplyCurrent()
 	elseif nTab == 2 then
 		Apollo.LoadForm(self.oXml, "ListSettings", self.wndContainer, self)
 		self:ListApplyCurrent()
-		Threat:GetModule("List"):Preview()
 	elseif nTab == 3 then
 		Apollo.LoadForm(self.oXml, "NotifySettings", self.wndContainer, self)
 		self:NotifyApplyCurrent()
+		--ModuleNotify:Preview()
 	elseif nTab == 4 then
 		Apollo.LoadForm(self.oXml, "MiniSettings", self.wndContainer, self)
 		self:MiniApplyCurrent()
@@ -249,6 +258,8 @@ function Settings:ListApplyCurrent()
 	self.wndContainer:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.tList.bUseSelfWarning)
 
 	self:CreateColors()
+
+	Threat:GetModule("List"):Preview()
 end
 
 -- Radio buttons
@@ -343,6 +354,18 @@ function Settings:CreateColors()
 	wndList:ArrangeChildrenVert()
 end
 
+function Settings:OnBtnResetListPos(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.tPosition = self:clone(Threat.tDefaults.profile.tList.tPosition)
+	Threat.tOptions.profile.tList.tSize = self:clone(Threat.tDefaults.profile.tList.tSize)
+	Threat:GetModule("Main"):UpdatePosition()
+end
+
+function Settings:OnBtnResetListSettings(wndHandler, wndControl)
+	Threat.tOptions.profile.tList = self:clone(Threat.tDefaults.profile.tList)
+	Threat:GetModule("Main"):UpdatePosition()
+	self:ListApplyCurrent()
+end
+
 --
 --	Tab - Notify
 --
@@ -374,6 +397,22 @@ function Settings:CreateColor(wndParent, pColor, pData, pText)
 		tColor.nB / 255,
 		tColor.nA / 255
 	))
+end
+
+-- Table copy for invidual settings reset
+function Settings:clone(t)
+    if type(t) ~= "table" then return t end
+    local meta = getmetatable(t)
+    local target = {}
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            target[k] = self:clone(v)
+        else
+            target[k] = v
+        end
+    end
+    setmetatable(target, meta)
+    return target
 end
 
 --[[

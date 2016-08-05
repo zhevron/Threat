@@ -4,6 +4,8 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Notify = Threat:NewModule("Notify")
 
+Notify.bInPreview = false
+
 --[[ Initial functions ]]--
 
 function Notify:OnInitialize()
@@ -34,7 +36,7 @@ end
 --[[ Update and Clear ]]--
 
 function Notify:Update(bIsPlayerTank, nPlayerValue, nHighest)
-	if self.wndMain == nil then return end
+	if self.wndMain == nil or self.bInPreview then return end
 
 	if bIsPlayerTank or nPlayerValue == 0 or nHighest == 0 then self:Clear() return end
 
@@ -56,7 +58,7 @@ function Notify:Update(bIsPlayerTank, nPlayerValue, nHighest)
 end
 
 function Notify:Clear()
-	if self.wndMain == nil then return end
+	if self.wndMain == nil or self.bInPreview then return end
 
 	self.wndNotifier:Show(false)
 end
