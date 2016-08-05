@@ -10,8 +10,6 @@ Main.tThreatList = {}
 Main.bCanInstantUpdate = true
 Main.bUpdateAwaiting = false
 
-Main.bInPreview = false
-
 function Main:OnInitialize()
 	self.tUpdateTimer = ApolloTimer.Create(Threat.tOptions.profile.nUpdateRate, true, "OnUpdateTimer", self)
 	self.tUpdateTimer:Stop()
@@ -95,8 +93,6 @@ function Main:UpdateUI()
 	self.bCanInstantUpdate = false
 
 	-- Checks
-	if self.bInPreview then return end
-
 	if (#self.tThreatList < 1) or (not Threat.tOptions.profile.bShowSolo and #self.tThreatList < 2) then
 		self:ClearUI()
 		return
@@ -166,9 +162,6 @@ function Main:UpdateUI()
 end
 
 function Main:ClearUI()
-	if self.bInPreview then return end
-
-	-- Calling UI module clears
 	Threat:GetModule("List"):Clear()
 	Threat:GetModule("Notify"):Clear()
 end

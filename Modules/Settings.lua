@@ -40,7 +40,6 @@ function Settings:OnDocumentReady()
 	self.wndMain:Show(false)
 
 	self.wndContainer = self.wndMain:FindChild("Container")
-	self.wndTabs = self.wndMain:FindChild("Navigation")
 end
 
 --
@@ -52,6 +51,7 @@ function Settings:OnClose(wndHandler, wndControl)
 	if not self.wndMain:IsShown() then return end
 
 	Threat:GetModule("List").wndMain:FindChild("Background"):Show(false)
+	Threat:GetModule("List").bInPreview = false
 	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(false)
 
 	Threat:GetModule("Main"):ClearUI()
@@ -64,10 +64,15 @@ end
 function Settings:Open(nTab)
 	if self.wndMain == nil or self.nCurrentTab == nTab then return end
 
-	self.wndTabs:FindChild("TabGeneral"):SetCheck(nTab == 1)
-	self.wndTabs:FindChild("TabList"):SetCheck(nTab == 2)
-	self.wndTabs:FindChild("TabNotify"):SetCheck(nTab == 3)
-	self.wndTabs:FindChild("TabMini"):SetCheck(nTab == 4)
+	Threat:GetModule("List").wndMain:FindChild("Background"):Show(true)
+	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(true)
+
+	local wndTabs = self.wndMain:FindChild("Navigation")
+
+	wndTabs:FindChild("TabGeneral"):SetCheck(nTab == 1)
+	wndTabs:FindChild("TabList"):SetCheck(nTab == 2)
+	wndTabs:FindChild("TabNotify"):SetCheck(nTab == 3)
+	wndTabs:FindChild("TabMini"):SetCheck(nTab == 4)
 
 	self:LoadTab(nTab)
 
@@ -79,11 +84,11 @@ function Settings:LoadTab(nTab)
 
 	if nTab == nil then nTab = 1 end
 
+	Threat:GetModule("List").bInPreview = (nTab == 2)
+	if nTab ~= 2 and self.nCurrentTab == 2 then Threat:GetModule("List"):Clear() end
+
 	self.wndContainer:DestroyChildren()
 	self.nCurrentTab = nTab
-
-	Threat:GetModule("List").wndMain:FindChild("Background"):Show(nTab == 2)
-	Threat:GetModule("Notify").wndMain:FindChild("Background"):Show(nTab == 3)
 
 	-- Need current settings loader
 	if nTab == 1 then
@@ -92,6 +97,7 @@ function Settings:LoadTab(nTab)
 	elseif nTab == 2 then
 		Apollo.LoadForm(self.oXml, "ListSettings", self.wndContainer, self)
 		self:ListApplyCurrent()
+		Threat:GetModule("List"):Preview()
 	elseif nTab == 3 then
 		Apollo.LoadForm(self.oXml, "NotifySettings", self.wndContainer, self)
 		self:NotifyApplyCurrent()
@@ -248,31 +254,38 @@ end
 -- Radio buttons
 function Settings:OnBtnSimpleColors(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.nColorMode = 0
+	Threat:GetModule("List"):Preview()
 end
 
 function Settings:OnBtnRoleColors(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.nColorMode = 1
+	Threat:GetModule("List"):Preview()
 end
 
 function Settings:OnBtnClassColors(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.nColorMode = 2
+	Threat:GetModule("List"):Preview()
 end
 
 -- Checkboxes
 function Settings:OnBtnShowDifferences(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.bShowDifferences = wndControl:IsChecked()
+	Threat:GetModule("List"):Preview()
 end
 
 function Settings:OnBtnRightToLeftBars(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.bRightToLeftBars = wndControl:IsChecked()
+	Threat:GetModule("List"):Preview()
 end
 
 function Settings:OnBtnAlwaysUseSelf(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.bAlwaysUseSelfColor = wndControl:IsChecked()
+	Threat:GetModule("List"):Preview()
 end
 
 function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.bUseSelfWarning = wndControl:IsChecked()
+	Threat:GetModule("List"):Preview()
 end
 
 -- Other
@@ -286,11 +299,11 @@ function Settings:OnBtnChoose(wndHandler, wndControl)
 			tColor.nB / 255,
 			tColor.nA / 255
 		)
-		GeminiColor:ShowColorPicker(self, "OnColorPicker", true, sColor, wndControl:GetParent())
+		GeminiColor:ShowColorPicker(self, "OnColorPickerList", true, sColor, wndControl:GetParent())
 	end
 end
 
-function Settings:OnColorPicker(sColor, wndControl)
+function Settings:OnColorPickerList(sColor, wndControl)
 	local GeminiColor = Apollo.GetPackage("GeminiColor").tPackage
 	local nR, nG, nB, nA = GeminiColor:HexToRGBAPerc(sColor)
 	Threat.tOptions.profile.tList.tColors[wndControl:GetData()] = {
@@ -300,6 +313,8 @@ function Settings:OnColorPicker(sColor, wndControl)
 		nA = nA * 255
 	}
 	wndControl:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(nR, nG, nB, nA))
+
+	Threat:GetModule("List"):PreviewColor()
 end
 
 function Settings:CreateColors()
@@ -328,20 +343,6 @@ function Settings:CreateColors()
 	wndList:ArrangeChildrenVert()
 end
 
-function Settings:CreateColor(wndList, pColor, pData, pText)
-	local wndColor = Apollo.LoadForm(self.oXml, "Color", wndList, self)
-	local tColor = pColor
-	wndColor:SetData(pData)
-	wndColor:FindChild("Name"):SetText(pText)
-	wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
-		tColor.nR / 255,
-		tColor.nG / 255,
-		tColor.nB / 255,
-		tColor.nA / 255
-	))
-end
-
-
 --
 --	Tab - Notify
 --
@@ -356,6 +357,23 @@ end
 
 function Settings:MiniApplyCurrent()
 	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tMini.nShow])
+end
+
+--
+--	Other
+--
+
+function Settings:CreateColor(wndParent, pColor, pData, pText)
+	local wndColor = Apollo.LoadForm(self.oXml, "Color", wndParent, self)
+	local tColor = pColor
+	wndColor:SetData(pData)
+	wndColor:FindChild("Name"):SetText(pText)
+	wndColor:FindChild("ColorBackground"):SetBGColor(ApolloColor.new(
+		tColor.nR / 255,
+		tColor.nG / 255,
+		tColor.nB / 255,
+		tColor.nA / 255
+	))
 end
 
 --[[

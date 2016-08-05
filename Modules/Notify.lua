@@ -4,8 +4,6 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Notify = Threat:NewModule("Notify")
 
-Notify.bActive = false
-
 --[[ Initial functions ]]--
 
 function Notify:OnInitialize()
@@ -43,8 +41,6 @@ function Notify:Update(bIsPlayerTank, nPlayerValue, nHighest)
 	local nPercent = nPlayerValue / nHighest
 	
 	if nPercent >= Threat.tOptions.profile.tNotify.tAlert.tLow.nPercent then
-		self.bActive = true
-
 		if nPercent >= Threat.tOptions.profile.tNotify.tAlert.tHigh.nPercent then
 			if nPercent >= 1 then
 				self:SetNotifyVisual(3, nPercent)
@@ -62,7 +58,6 @@ end
 function Notify:Clear()
 	if self.wndMain == nil then return end
 
-	self.bActive = false
 	self.wndNotifier:Show(false)
 end
 
@@ -104,7 +99,7 @@ end
 function Notify:OnMouseExit(wndHandler, wndControl)
 	if wndControl ~= self.wndMain then return end
 
-	if Threat:GetModule("Settings").nCurrentTab ~= 3 then
+	if Threat:GetModule("Settings").nCurrentTab == 0 then
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end

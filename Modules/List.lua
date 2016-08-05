@@ -5,9 +5,10 @@ require "GroupLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local List = Threat:NewModule("List")
 
-List.bActive = false
 List.nBarHeight = 10
 List.nBarSlots = 0
+
+List.bInPreview = false
 
 --[[ Initial functions ]]--
 
@@ -50,9 +51,8 @@ end
 --[[ Update and Clear ]]--
 
 function List:Update(tThreatList, nPlayerId, nHighest)
-	if self.wndMain == nil then return end
+	if self.wndMain == nil or self.bInPreview then return end
 
-	self.bActive = true
 	self:CreateBars(#tThreatList)
 
 	local nBars = #self.wndList:GetChildren()
@@ -67,9 +67,8 @@ function List:Update(tThreatList, nPlayerId, nHighest)
 end
 
 function List:Clear()
-	if self.wndMain == nil then return end
+	if self.wndMain == nil or self.bInPreview then return end
 
-	self.bActive = false
 	self.wndList:DestroyChildren()
 end
 
@@ -203,7 +202,7 @@ end
 function List:OnMouseExit(wndHandler, wndControl)
 	if wndControl ~= self.wndMain then return end
 
-	if Threat:GetModule("Settings").nCurrentTab ~= 2 then
+	if Threat:GetModule("Settings").nCurrentTab == 0 then
 		self.wndMain:FindChild("Background"):Show(false)
 	end
 end
@@ -227,7 +226,13 @@ function List:OnWindowSizeChanged()
 	Threat.tOptions.profile.tList.tSize.nWidth = nRight - nLeft
 	Threat.tOptions.profile.tList.tSize.nHeight = nBottom - nTop
 
+	local nOldBarSlots = self.nBarSlots
+
 	self:SetBarSlots()
+
+	if self.bInPreview and nOldBarSlots ~= self.nBarSlots then
+		self:Preview()
+	end
 end
 
 --[[ Window updaters ]]--
@@ -253,9 +258,8 @@ end
 
 --[[ Preview ]]--
 
-function List:Preview()
-	local nPlayerId = GameLib.GetPlayerUnit():GetId()
-	local tEntries = {
+function List:GetPreviewEntries()
+	return {
 		{
 			nId = 0,
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Warrior),
@@ -285,7 +289,7 @@ function List:Preview()
 			nValue = 700000
 		},
 		{
-			nId = nPlayerId,
+			nId = GameLib.GetPlayerUnit():GetId(),
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Spellslinger),
 			eClass = GameLib.CodeEnumClass.Spellslinger,
 			bPet = false,
@@ -306,6 +310,11 @@ function List:Preview()
 			nValue = 400000
 		}
 	}
+end
+
+function List:Preview()
+	local nPlayerId = GameLib.GetPlayerUnit():GetId()
+	local tEntries = self:GetPreviewEntries()
 
 	self:CreateBars(#tEntries)
 
@@ -318,5 +327,20 @@ function List:Preview()
 			if nBars == nIndex then break end
 		end
 		self.wndList:ArrangeChildrenVert()
+	end
+end
+
+function List:PreviewColor()
+	local nPlayerId = GameLib.GetPlayerUnit():GetId()
+	local tEntries = self:GetPreviewEntries()
+	local nBars = #self.wndList:GetChildren()
+
+	if nBars > 0 then
+		for nIndex, tEntry in pairs(tEntries) do
+			local wndBarBackground = self.wndList:GetChildren()[nIndex]:FindChild("Background")
+			local nR, nG, nB, nA = self:GetColorForEntry(tEntry, nIndex == 1, nPlayerId)
+			wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
+			if nBars == nIndex then break end
+		end
 	end
 end
