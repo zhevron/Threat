@@ -250,11 +250,16 @@ end
 --
 
 function Settings:ListApplyCurrent()
+	if self.nCurrentTab ~= 2 then return end
+
 	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tList.nShow])
 
 	self.wndContainer:FindChild("BtnSimpleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 0)
 	self.wndContainer:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 1)
 	self.wndContainer:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 2)
+
+	self.wndContainer:FindChild("BtnBarDefault"):SetCheck(Threat.tOptions.profile.tList.bBarBorder)
+	self.wndContainer:FindChild("BtnBarNoBorder"):SetCheck(not Threat.tOptions.profile.tList.bBarBorder)
 
 	self.wndContainer:FindChild("BtnShowDifferences"):SetCheck(Threat.tOptions.profile.tList.bShowDifferences)
 	self.wndContainer:FindChild("BtnRightToLeftBars"):SetCheck(Threat.tOptions.profile.tList.bRightToLeftBars)
@@ -267,19 +272,31 @@ function Settings:ListApplyCurrent()
 end
 
 -- Radio buttons
+--Color
 function Settings:OnBtnSimpleColors(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.nColorMode = 0
-	Threat:GetModule("List"):Preview()
+	Threat:GetModule("List"):PreviewColor()
 end
 
 function Settings:OnBtnRoleColors(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.nColorMode = 1
-	Threat:GetModule("List"):Preview()
+	Threat:GetModule("List"):PreviewColor()
 end
 
 function Settings:OnBtnClassColors(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.nColorMode = 2
-	Threat:GetModule("List"):Preview()
+	Threat:GetModule("List"):PreviewColor()
+end
+
+--Bar Style
+function Settings:OnBtnBarDefault(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.bBarBorder = true
+	Threat:GetModule("List"):PreviewBarStyle()
+end
+
+function Settings:OnBtnBarNoBorder(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.bBarBorder = false
+	Threat:GetModule("List"):PreviewBarStyle()
 end
 
 -- Checkboxes
@@ -295,12 +312,12 @@ end
 
 function Settings:OnBtnAlwaysUseSelf(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.bAlwaysUseSelfColor = wndControl:IsChecked()
-	Threat:GetModule("List"):Preview()
+	Threat:GetModule("List"):PreviewColor()
 end
 
 function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
 	Threat.tOptions.profile.tList.bUseSelfWarning = wndControl:IsChecked()
-	Threat:GetModule("List"):Preview()
+	Threat:GetModule("List"):PreviewColor()
 end
 
 -- Other
@@ -347,6 +364,8 @@ end
 --
 
 function Settings:NotifyApplyCurrent()
+	if self.nCurrentTab ~= 3 then return end
+
 	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tNotify.nShow])
 end
 
@@ -355,6 +374,8 @@ end
 --
 
 function Settings:MiniApplyCurrent()
+	if self.nCurrentTab ~= 4 then return end
+
 	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tMini.nShow])
 end
 

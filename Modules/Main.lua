@@ -177,6 +177,11 @@ function Main:GetShowModule(nSetting, bInGroup, bInRaid)
 	end
 end
 
+function Main:ReloadSettings()
+	self:UpdatePosition()
+	self:UpdateLockStatus()
+end
+
 function Main:UpdatePosition()
 	Threat:GetModule("List"):UpdatePosition()
 	Threat:GetModule("Notify"):UpdatePosition()

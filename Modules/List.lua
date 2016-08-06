@@ -88,7 +88,8 @@ function List:CreateBars(nTListNum)
 		else
 			--If needs to create some bars
 			for nIdx = nListNum + 1, nThreatListNum do
-				Apollo.LoadForm(self.oXml, "Bar", self.wndList, self)
+				local wndBar = Apollo.LoadForm(self.oXml, "Bar", self.wndList, self)
+				wndBar:SetStyle("Border", Threat.tOptions.profile.tList.bBarBorder)
 			end
 		end
 	end
@@ -336,11 +337,18 @@ function List:PreviewColor()
 	local nBars = #self.wndList:GetChildren()
 
 	if nBars > 0 then
-		for nIndex, tEntry in pairs(tEntries) do
+		for nIndex, tEntry in ipairs(tEntries) do
 			local wndBarBackground = self.wndList:GetChildren()[nIndex]:FindChild("Background")
 			local nR, nG, nB, nA = self:GetColorForEntry(tEntry, nIndex == 1, nPlayerId)
 			wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 			if nBars == nIndex then break end
 		end
 	end
+end
+
+function List:PreviewBarStyle()
+	for _, wndBarEnt in ipairs(self.wndList:GetChildren()) do
+		wndBarEnt:SetStyle("Border", Threat.tOptions.profile.tList.bBarBorder)
+	end
+	self.wndList:ArrangeChildrenVert()
 end

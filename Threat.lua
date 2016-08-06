@@ -28,6 +28,7 @@ Threat.tDefaults = {
 
 			bShowDifferences = false,
 			bRightToLeftBars = false,
+			bBarBorder = true,
 
 			tPosition = {
 				nX = 620,
@@ -141,9 +142,6 @@ function Threat:OnProfileCopied(db, sourceProfile)
 end
 
 function Threat:ReloadSettings()
-	local Main = self:GetModule("Main")
-	Main:UpdatePosition()
-	Main:UpdateLockStatus()
-
+	self:GetModule("Main"):ReloadSettings()
 	self:GetModule("Settings"):GeneralApplyCurrent()
 end
