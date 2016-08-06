@@ -69,12 +69,14 @@ function Notify:SetNotifyVisual(nProfile, nPercent)
 	local tAlert = Threat.tOptions.profile.tNotify.tAlert
 
 	if nProfile == 1 then
-		self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, tAlert.tLow.nAlphaText))
+		local tColor = Threat.tOptions.profile.tNotify.tColors.tLowText
+		self.wndNotifier:SetTextColor(ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tAlert.tLow.nAlphaText))
 		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tLow.nAlphaBG))
 		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
 		self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
 	else
-		self.wndNotifier:SetTextColor(ApolloColor.new(1, 1, 1, tAlert.tHigh.nAlphaText))
+		local tColor = Threat.tOptions.profile.tNotify.tColors.tHighText
+		self.wndNotifier:SetTextColor(ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tAlert.tHigh.nAlphaText))
 		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tHigh.nAlphaBG))
 		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
 
@@ -138,4 +140,12 @@ function Notify:UpdateLockStatus()
 
 	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+end
+
+function Notify:Preview(bHigh)
+	if bHigh then
+		self:SetNotifyVisual(2, Threat.tOptions.profile.tNotify.tAlert.tHigh.nPercent)
+	else
+		self:SetNotifyVisual(1, Threat.tOptions.profile.tNotify.tAlert.tLow.nPercent)
+	end
 end

@@ -52,7 +52,10 @@ function Settings:ModuleSetUp(Module)
 end
 
 function Settings:ModuleSetBack(Module, Num)
-	Module.wndMain:FindChild("Background"):Show(false)
+	local BG = Module.wndMain:FindChild("Background")
+	BG:Show(false)
+	BG:SetTextColor(ApolloColor.new(1,1,1,0.15))
+
 	Module.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
 	Module.bInPreview = false
 
@@ -61,7 +64,10 @@ end
 
 function Settings:ModuleTabChange(Module, Num, nTab)
 	Module.bInPreview = (nTab == Num)
-	if nTab ~= Num and self.nCurrentTab == Num then Module:Clear() end
+	if nTab ~= Num and self.nCurrentTab == Num then
+		Module:Clear()
+		Module.wndMain:FindChild("Background"):SetTextColor(ApolloColor.new(1,1,1,0.15))
+	end
 end
 
 function Settings:OnClose(wndHandler, wndControl)
@@ -266,9 +272,10 @@ function Settings:ListApplyCurrent()
 	self.wndContainer:FindChild("BtnAlwaysUseSelf"):SetCheck(Threat.tOptions.profile.tList.bAlwaysUseSelfColor)
 	self.wndContainer:FindChild("BtnShowSelfWarning"):SetCheck(Threat.tOptions.profile.tList.bUseSelfWarning)
 
-	self:CreateColors()
+	self:ListCreateColors()
 
 	Threat:GetModule("List"):Preview()
+	Threat:GetModule("List").wndMain:FindChild("Background"):SetTextColor(ApolloColor.new(1,1,1,0))
 end
 
 -- Radio buttons
@@ -321,7 +328,7 @@ function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
 end
 
 -- Other
-function Settings:CreateColors()
+function Settings:ListCreateColors()
 	local wndList = self.wndContainer:FindChild("LstColor")
 	wndList:DestroyChildren()
 
@@ -367,6 +374,90 @@ function Settings:NotifyApplyCurrent()
 	if self.nCurrentTab ~= 3 then return end
 
 	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[Threat.tOptions.profile.tNotify.nShow])
+
+	self:SetSlider("SliderAlertLowPercent", Threat.tOptions.profile.tNotify.tAlert.tLow.nPercent * 100)
+	self:SetSlider("SliderAlertLowBGAlpha", Threat.tOptions.profile.tNotify.tAlert.tLow.nAlphaBG * 100)
+	self:SetSlider("SliderAlertLowTextAlpha", Threat.tOptions.profile.tNotify.tAlert.tLow.nAlphaText * 100)
+
+	self:SetSlider("SliderAlertHighPercent", Threat.tOptions.profile.tNotify.tAlert.tHigh.nPercent * 100)
+	self:SetSlider("SliderAlertHighBGAlpha", Threat.tOptions.profile.tNotify.tAlert.tHigh.nAlphaBG * 100)
+	self:SetSlider("SliderAlertHighTextAlpha", Threat.tOptions.profile.tNotify.tAlert.tHigh.nAlphaText * 100)
+
+	self:NotifyCreateColors()
+
+	Threat:GetModule("Notify"):Preview(true)
+	Threat:GetModule("Notify").wndMain:FindChild("Background"):SetTextColor(ApolloColor.new(1,1,1,0))
+end
+
+function Settings:NotifyCreateColors()
+	local wndList = self.wndContainer:FindChild("LstColor")
+	wndList:DestroyChildren()
+
+	self:CreateColor(wndList, Threat.tOptions.profile.tNotify.tColors.tLowText, "tLowText", "Basic Alert Text")
+	self:CreateColor(wndList, Threat.tOptions.profile.tNotify.tColors.tHighText, "tHighText", "High Alert Text")
+
+	wndList:ArrangeChildrenVert()
+end
+
+--  Sliders
+
+function Settings:OnSliderLowPercent(wndHandler, wndControl, fNewValue, fOldValue)
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+	Threat.tOptions.profile.tNotify.tAlert.tLow.nPercent = fNewValue / 100
+
+	Threat:GetModule("Notify"):Preview(false)
+end
+
+function Settings:OnSliderLowBGAlpha(wndHandler, wndControl, fNewValue, fOldValue)
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+	Threat.tOptions.profile.tNotify.tAlert.tLow.nAlphaBG = fNewValue / 100
+
+	Threat:GetModule("Notify"):Preview(false)
+end
+
+function Settings:OnSliderLowTextAlpha(wndHandler, wndControl, fNewValue, fOldValue)
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+	Threat.tOptions.profile.tNotify.tAlert.tLow.nAlphaText = fNewValue / 100
+
+	Threat:GetModule("Notify"):Preview(false)
+end
+
+function Settings:OnSliderHighPercent(wndHandler, wndControl, fNewValue, fOldValue)
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+	Threat.tOptions.profile.tNotify.tAlert.tHigh.nPercent = fNewValue / 100
+
+	Threat:GetModule("Notify"):Preview(true)
+end
+
+function Settings:OnSliderHighBGAlpha(wndHandler, wndControl, fNewValue, fOldValue)
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+	Threat.tOptions.profile.tNotify.tAlert.tHigh.nAlphaBG = fNewValue / 100
+
+	Threat:GetModule("Notify"):Preview(true)
+end
+
+function Settings:OnSliderHighTextAlpha(wndHandler, wndControl, fNewValue, fOldValue)
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(self:ToPercent(fNewValue))
+	Threat.tOptions.profile.tNotify.tAlert.tHigh.nAlphaText = fNewValue / 100
+
+	Threat:GetModule("Notify"):Preview(true)
+end
+
+function Settings:OnBtnResetNotifyPos(wndHandler, wndControl)
+	Threat.tOptions.profile.tNotify.tPosition = self:clone(Threat.tDefaults.profile.tNotify.tPosition)
+	Threat:GetModule("Notify"):UpdatePosition()
+end
+
+function Settings:OnBtnResetNotifySettings(wndHandler, wndControl)
+	Threat.tOptions.profile.tNotify = self:clone(Threat.tDefaults.profile.tNotify)
+	Threat:GetModule("Notify"):UpdatePosition()
+	self:NotifyApplyCurrent()
 end
 
 --
@@ -421,6 +512,11 @@ function Settings:OnColorPicker(sColor, wndControl)
 		Threat:GetModule("List"):PreviewColor()
 	elseif self.nCurrentTab == 3 then
 		Threat.tOptions.profile.tNotify.tColors[wndControl:GetData()] = tColor
+		if wndControl:GetData() == "tLowText" then
+			Threat:GetModule("Notify"):Preview(false)
+		elseif wndControl:GetData() == "tHighText" then
+			Threat:GetModule("Notify"):Preview(true)
+		end
 	end
 end
 
@@ -435,6 +531,16 @@ function Settings:CreateColor(wndParent, pColor, pData, pText)
 		tColor.nB / 255,
 		tColor.nA / 255
 	))
+end
+
+function Settings:SetSlider(strName, nValue)
+	local wndSlider = self.wndContainer:FindChild(strName)
+	wndSlider:FindChild("SliderBar"):SetValue(nValue)
+	wndSlider:FindChild("SliderOutput"):SetText(self:ToPercent(nValue))
+end
+
+function Settings:ToPercent(value)
+	return string.format("%d%s", value, "%")
 end
 
 -- Table copy for invidual settings reset

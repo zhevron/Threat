@@ -66,9 +66,9 @@ Threat.tDefaults = {
 
 			tAlert = {
 				tLow = {
-					nPercent = 0.88,
-					nAlphaBG = 0.5,
-					nAlphaText = 0.7
+					nPercent = 0.9,
+					nAlphaBG = 0.6,
+					nAlphaText = 0.8
 				},
 				tHigh = {
 					nPercent = 0.95,
@@ -83,8 +83,8 @@ Threat.tDefaults = {
 			},
 
 			tColors = {
-				tLowText = { nR = 145, nG = 25, nB = 220, nA = 255 },
-				tHighText = { nR = 145, nG = 25, nB = 220, nA = 255 }
+				tLowText = { nR = 255, nG = 255, nB = 255, nA = 255 },
+				tHighText = { nR = 255, nG = 255, nB = 255, nA = 255 }
 			}
 		},
 
