@@ -97,7 +97,6 @@ function Main:UpdateUI()
 		self:ClearUI()
 		return
 	end
-
 	-- Creating variables for the UI update
 	local oPlayer = GameLib.GetPlayerUnit()
 	local nPlayerValue = 0
@@ -111,36 +110,43 @@ function Main:UpdateUI()
 	local bIsPlayerTank = false
 	local tTanks = {}
 
+	local bNotifyActive = self:GetShowModule(Threat.tOptions.profile.tNotify.nShow, bInGroup, bInRaid)
+	local bMiniActive = self:GetShowModule(Threat.tOptions.profile.tMini.nShow, bInGroup, bInRaid)
+
 	-- Getting tank names
-	if bInGroup then
+	if bInGroup and (bNotifyActive or bMiniActive) then
 		for nIdx = 1, GroupLib.GetMemberCount() do
-			local tMemberData = GroupLib.GetGroupMember(nIdx)
+			local tMD = GroupLib.GetGroupMember(nIdx)
 
-			if tMemberData.strCharacterName == oPlayer:GetName() then
-				bIsPlayerTank = tMemberData.bTank
-			end
+			if tMD.bTank then
+				table.insert(tTanks, tMD.strCharacterName)
 
-			if tMemberData.bTank then
-				table.insert(tTanks, tMemberData.strCharacterName)
+				if not bIsPlayerTank and tMD.strCharacterName == oPlayer:GetName() then
+					bIsPlayerTank = true
+				end
 			end
 		end
 	end
 
 	-- Getting info from the tThreatList
-	for nIndex, tEntry in ipairs(self.tThreatList) do
-		if nPlayerValue == 0 and oPlayer:GetId() == tEntry.nId then
-			nPlayerValue = tEntry.nValue
-		end
+	if bNotifyActive or bMiniActive then
+		for nIndex, tEntry in ipairs(self.tThreatList) do
+			if nPlayerValue == 0 and oPlayer:GetId() == tEntry.nId then
+				nPlayerValue = tEntry.nValue
+			end
 
-		if nTopThreatSecond == 0 and nIndex == 2 then
-			nTopThreatSecond = tEntry.nValue
-		end
+			if bMiniActive then
+				if nTopThreatSecond == 0 and nIndex == 2 then
+					nTopThreatSecond = tEntry.nValue
+				end
 
-		if nTopThreatTank == 0 then
-			for _, strTankName in ipairs(tTanks) do
-				if tEntry.sName == strTankName then
-					nTopThreatTank = tEntry.nValue
-					break
+				if nTopThreatTank == 0 then
+					for _, strTankName in ipairs(tTanks) do
+						if tEntry.sName == strTankName then
+							nTopThreatTank = tEntry.nValue
+							break
+						end
+					end
 				end
 			end
 		end
@@ -154,11 +160,15 @@ function Main:UpdateUI()
 	end
 
 	-- Notification:
-	if self:GetShowModule(Threat.tOptions.profile.tNotify.nShow, bInGroup, bInRaid) then
+	if bNotifyActive then
 		Threat:GetModule("Notify"):Update(bIsPlayerTank, nPlayerValue, nTopThreatFirst)
 	end
 
 	-- Mini:
+	if bMiniActive then
+		--Threat:GetModule("Mini"):Update(~~)
+	end
+
 end
 
 function Main:ClearUI()

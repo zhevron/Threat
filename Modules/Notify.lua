@@ -4,6 +4,7 @@ require "GameLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local Notify = Threat:NewModule("Notify")
 
+Notify.nCurrentProfile = 0
 Notify.bInPreview = false
 
 --[[ Initial functions ]]--
@@ -66,28 +67,37 @@ end
 --[[ Notify setup functions ]]--
 
 function Notify:SetNotifyVisual(nProfile, nPercent)
+	self.wndNotifier:Show(true)
+
 	local tAlert = Threat.tOptions.profile.tNotify.tAlert
 
 	if nProfile == 1 then
+		self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
+
+		if self.nCurrentProfile == nProfile and not self.bInPreview then return end
+
+		self.nCurrentProfile = nProfile
+
 		local tColor = Threat.tOptions.profile.tNotify.tColors.tLowText
 		self.wndNotifier:SetTextColor(ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tAlert.tLow.nAlphaText))
 		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tLow.nAlphaBG))
 		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3")
-		self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
 	else
-		local tColor = Threat.tOptions.profile.tNotify.tColors.tHighText
-		self.wndNotifier:SetTextColor(ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tAlert.tHigh.nAlphaText))
-		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tHigh.nAlphaBG))
-		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
-
 		if nProfile == 2 then
 			self.wndNotifier:SetText(string.format("Close to highest threat: %d%s", nPercent * 100,"%"))
 		else
 			self.wndNotifier:SetText("You have the highest threat!")
 		end
-	end
 
-	self.wndNotifier:Show(true)
+		if self.nCurrentProfile == nProfile and not self.bInPreview then return end
+
+		self.nCurrentProfile = nProfile
+
+		local tColor = Threat.tOptions.profile.tNotify.tColors.tHighText
+		self.wndNotifier:SetTextColor(ApolloColor.new(tColor.nR / 255, tColor.nG / 255, tColor.nB / 255, tAlert.tHigh.nAlphaText))
+		self.wndNotifier:SetBGColor(ApolloColor.new(1, 1, 1, tAlert.tHigh.nAlphaBG))
+		self.wndNotifier:SetSprite("BK3:UI_BK3_Holo_Framing_3_Alert")
+	end
 end
 
 --[[ Window events ]]--
