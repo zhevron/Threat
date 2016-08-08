@@ -39,7 +39,8 @@ function List:OnDocumentReady()
 end
 
 function List:SetBarSlots()
-	self.nBarSlots = math.floor(self.wndList:GetHeight() / self.nBarHeight)
+	local nOffset = Threat.tOptions.profile.tList.nBarOffset
+	self.nBarSlots = math.floor((self.wndList:GetHeight() + nOffset) / (self.nBarHeight + nOffset))
 end
 
 function List:OnEnable()
@@ -89,9 +90,20 @@ function List:CreateBars(nTListNum)
 			--If needs to create some bars
 			for nIdx = nListNum + 1, nThreatListNum do
 				local wndBar = Apollo.LoadForm(self.oXml, "Bar", self.wndList, self)
-				wndBar:SetStyle("Border", Threat.tOptions.profile.tList.bBarBorder)
+				self:SetBarOptions(wndBar)
 			end
 		end
+	end
+end
+
+function List:SetBarOptions(wndBar)
+	local nOffset = Threat.tOptions.profile.tList.nBarOffset
+	local nL, nT, nR, nB = wndBar:GetAnchorOffsets()
+	wndBar:SetAnchorOffsets(nL, nT, nR, nB + nOffset)
+
+	for _, v in ipairs(wndBar:GetChildren()) do
+		local nL, nT, nR, nB = v:GetAnchorOffsets()
+		v:SetAnchorOffsets(nL, nT, nR, nB - nOffset)
 	end
 end
 
@@ -222,7 +234,9 @@ function List:OnWindowMove()
 	Threat.tOptions.profile.tList.tPosition.nY = nTop
 end
 
-function List:OnWindowSizeChanged()
+function List:OnWindowSizeChanged(wndHandler, wndControl)
+	if wndControl ~= self.wndMain then return end
+
 	local nLeft, nTop, nRight, nBottom = self.wndMain:GetAnchorOffsets()
 	Threat.tOptions.profile.tList.tSize.nWidth = nRight - nLeft
 	Threat.tOptions.profile.tList.tSize.nHeight = nBottom - nTop
@@ -260,6 +274,7 @@ end
 --[[ Preview ]]--
 
 function List:GetPreviewEntries()
+	local oPlayer = GameLib.GetPlayerUnit()
 	return {
 		{
 			nId = 0,
@@ -269,46 +284,53 @@ function List:GetPreviewEntries()
 			nValue = 1000000
 		},
 		{
+			nId = oPlayer:GetId(),
+			sName = oPlayer:GetName(),
+			eClass = oPlayer:GetClassId(),
+			bPet = false,
+			nValue = 900000
+		},
+		{
 			nId = 0,
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Engineer),
 			eClass = GameLib.CodeEnumClass.Engineer,
 			bPet = false,
-			nValue = 900000
+			nValue = 800000
 		},
 		{
 			nId = 0,
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Esper),
 			eClass = GameLib.CodeEnumClass.Esper,
 			bPet = false,
-			nValue = 800000
+			nValue = 700000
 		},
 		{
 			nId = 0,
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Medic),
 			eClass = GameLib.CodeEnumClass.Medic,
 			bPet = false,
-			nValue = 700000
+			nValue = 600000
 		},
 		{
-			nId = GameLib.GetPlayerUnit():GetId(),
+			nId = 0,
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Spellslinger),
 			eClass = GameLib.CodeEnumClass.Spellslinger,
 			bPet = false,
-			nValue = 600000
+			nValue = 500000
 		},
 		{
 			nId = 0,
 			sName = GameLib.GetClassName(GameLib.CodeEnumClass.Stalker),
 			eClass = GameLib.CodeEnumClass.Stalker,
 			bPet = false,
-			nValue = 500000
+			nValue = 400000
 		},
 		{
 			nId = 0,
 			sName = "Pet",
 			eClass = nil,
 			bPet = true,
-			nValue = 400000
+			nValue = 300000
 		}
 	}
 end
@@ -346,9 +368,7 @@ function List:PreviewColor()
 	end
 end
 
-function List:PreviewBarStyle()
-	for _, wndBarEnt in ipairs(self.wndList:GetChildren()) do
-		wndBarEnt:SetStyle("Border", Threat.tOptions.profile.tList.bBarBorder)
-	end
-	self.wndList:ArrangeChildrenVert()
+function List:PreviewBarOffset()
+	self.wndList:DestroyChildren()
+	self:Preview()
 end

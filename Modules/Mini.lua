@@ -151,3 +151,31 @@ function Mini:UpdateLockStatus()
 	self.wndMain:SetStyle("Sizable", not Threat.tOptions.profile.bLock)
 	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
 end
+
+function Mini:Preview(nProfile)
+	local nPercent = 0
+
+	if nProfile == 1 then
+		nPercent = Threat.tOptions.profile.tMini.tSwitch.nMid / 2
+	elseif nProfile == 2 then
+		nPercent = Threat.tOptions.profile.tMini.tSwitch.nMid
+	elseif nProfile == 3 then
+		nPercent = Threat.tOptions.profile.tMini.tSwitch.nHigh
+	elseif nProfile == 4 then
+		nPercent = 1.2
+	end
+
+	self:UpdateText(nPercent)
+end
+
+function Mini:PreviewByColorName(strColor)
+	if strColor == "tLow" then
+		self:Preview(1)
+	elseif strColor == "tMid" then
+		self:Preview(2)
+	elseif strColor == "tHigh" then
+		self:Preview(3)
+	elseif strColor == "tOver" then
+		self:Preview(4)
+	end
+end

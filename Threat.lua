@@ -28,15 +28,15 @@ Threat.tDefaults = {
 
 			bShowDifferences = false,
 			bRightToLeftBars = false,
-			bBarBorder = true,
+			nBarOffset = 1,
 
 			tPosition = {
-				nX = 620,
+				nX = 840,
 				nY = 100
 			},
 			tSize = {
 				nWidth = 350,
-				nHeight = 179
+				nHeight = 181
 			},
 
 			bAlwaysUseSelfColor = true,
@@ -99,8 +99,8 @@ Threat.tDefaults = {
 			},
 
 			tPosition = {
-				nX = 700,
-				nY = 300
+				nX = 840,
+				nY = 450
 			},
 			tSize = {
 				nWidth = 160,
