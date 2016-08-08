@@ -90,16 +90,28 @@ Threat.tDefaults = {
 
 		tMini = {
 			nShow = 0,
-			bAlwaysShow = true,
+			bAlwaysShow = false,
 			bDifferenceToTank = false,
 
+			tSwitch = {
+				nMid = 0.85,
+				nHigh = 0.95
+			},
+
 			tPosition = {
-				nX = 620,
-				nY = 100
+				nX = 700,
+				nY = 300
 			},
 			tSize = {
-				nWidth = 350,
-				nHeight = 179
+				nWidth = 160,
+				nHeight = 100
+			},
+
+			tColors = {
+				tLow = { nR = 255, nG = 255, nB = 255, nA = 255 },
+				tMid = { nR = 255, nG = 100, nB = 0, nA = 255 },
+				tHigh = { nR = 255, nG = 0, nB = 0, nA = 255 },
+				tOver = { nR = 255, nG = 0, nB = 255, nA = 255 }
 			}
 		}
 	}

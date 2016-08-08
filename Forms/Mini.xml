@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Forms>
+    <Form Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="0" RAnchorOffset="160" BAnchorPoint="0" BAnchorOffset="100" RelativeToClient="1" Font="Default" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="ThreatMini" Border="0" Picture="0" SwallowMouseClicks="1" Moveable="1" Escapable="0" Overlapped="1" TooltipColor="" Tooltip="" Sizable="1" DoNotBlockTooltip="1" NeverBringToFront="1">
+        <Control Class="Window" LAnchorPoint="0" LAnchorOffset="-5" TAnchorPoint="0" TAnchorOffset="-5" RAnchorPoint="1" RAnchorOffset="5" BAnchorPoint="1" BAnchorOffset="5" RelativeToClient="1" Font="CRB_HeaderHuge" Text="Threat | Mini" BGColor="UI_AlphaPercent15" TextColor="UI_AlphaPercent15" Template="Default" TooltipType="OnCursor" Name="Background" TooltipColor="" Picture="1" IgnoreMouse="1" Sprite="BasicSprites:WhiteFill" Border="0" Tooltip="" Visible="0" TextId="" DT_CENTER="1" DT_VCENTER="1" Overlapped="1"/>
+        <Control Class="Window" LAnchorPoint="0" LAnchorOffset="0" TAnchorPoint="0" TAnchorOffset="0" RAnchorPoint="1" RAnchorOffset="0" BAnchorPoint="1" BAnchorOffset="0" RelativeToClient="1" Font="Subtitle" Text="" BGColor="UI_WindowBGDefault" TextColor="UI_WindowTextDefault" Template="Default" TooltipType="OnCursor" Name="Output" TooltipColor="" Tooltip="" TextId="CRB_100" DT_CENTER="1" DT_VCENTER="1"/>
+        <Event Name="MouseEnter" Function="OnMouseEnter"/>
+        <Event Name="MouseExit" Function="OnMouseExit"/>
+        <Event Name="WindowMove" Function="OnWindowMove"/>
+        <Event Name="WindowClosed" Function="Close"/>
+        <Event Name="MouseButtonUp" Function="OnMouseButtonUp"/>
+        <Event Name="WindowSizeChanged" Function="OnWindowSizeChanged"/>
+    </Form>
+</Forms>

@@ -166,7 +166,7 @@ function Main:UpdateUI()
 
 	-- Mini:
 	if bMiniActive then
-		--Threat:GetModule("Mini"):Update(~~)
+		Threat:GetModule("Mini"):Update(nPlayerValue, nTopThreatFirst, nTopThreatSecond, nTopThreatTank)
 	end
 
 end
@@ -174,6 +174,7 @@ end
 function Main:ClearUI()
 	Threat:GetModule("List"):Clear()
 	Threat:GetModule("Notify"):Clear()
+	Threat:GetModule("Mini"):Clear()
 end
 
 function Main:GetShowModule(nSetting, bInGroup, bInRaid)
@@ -195,9 +196,11 @@ end
 function Main:UpdatePosition()
 	Threat:GetModule("List"):UpdatePosition()
 	Threat:GetModule("Notify"):UpdatePosition()
+	Threat:GetModule("Mini"):UpdatePosition()
 end
 
 function Main:UpdateLockStatus()
 	Threat:GetModule("List"):UpdateLockStatus()
 	Threat:GetModule("Notify"):UpdateLockStatus()
+	Threat:GetModule("Mini"):UpdateLockStatus()
 end
