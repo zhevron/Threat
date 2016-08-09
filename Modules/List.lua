@@ -326,7 +326,7 @@ function List:GetPreviewEntries()
 			nValue = 400000
 		},
 		{
-			nId = 0,
+			nId = -1,
 			sName = "Pet",
 			eClass = nil,
 			bPet = true,
@@ -347,23 +347,28 @@ function List:Preview()
 	if nBars > 0 then
 		for nIndex, tEntry in pairs(tEntries) do
 			self:SetupBar(self.wndList:GetChildren()[nIndex], tEntry, nIndex == 1, nHighest, nPlayerId)
-
-			if Threat.tOptions.profile.tList.nColorMode == 1 then
-				if nIndex == 1 then
-					local tColor = Threat.tOptions.profile.tList.tColors.tTank or tWhite
-					local Color = ApolloColor.new((tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255))
-					self.wndList:GetChildren()[nIndex]:FindChild("Background"):SetBGColor(Color)
-				elseif nIndex == 7 then
-					local tColor = Threat.tOptions.profile.tList.tColors.tHealer or tWhite
-					local Color = ApolloColor.new((tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255))
-					self.wndList:GetChildren()[nIndex]:FindChild("Background"):SetBGColor(Color)
-				end
-			end
-			
+			self:PreviewSetRoleColor(nIndex, tEntry)
 			if nBars == nIndex then break end
 		end
 		self.wndList:ArrangeChildrenVert()
 	end
+end
+
+function List:PreviewSetRoleColor(nIndex, tEntry)
+	if Threat.tOptions.profile.tList.nColorMode == 1 then
+		if nIndex == 1 then
+			self:PreviewSetColor(Threat.tOptions.profile.tList.tColors.tTank, nIndex)
+		elseif nIndex == 7 then
+			self:PreviewSetColor(Threat.tOptions.profile.tList.tColors.tHealer, nIndex)
+		elseif tEntry.nId == 0 then
+			self:PreviewSetColor(Threat.tOptions.profile.tList.tColors.tDamage, nIndex)
+		end
+	end
+end
+
+function List:PreviewSetColor(tColor, nIndex)
+	local Color = ApolloColor.new((tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255))
+	self.wndList:GetChildren()[nIndex]:FindChild("Background"):SetBGColor(Color)
 end
 
 function List:PreviewColor()
@@ -377,17 +382,7 @@ function List:PreviewColor()
 			local nR, nG, nB, nA = self:GetColorForEntry(tEntry, nIndex == 1, nPlayerId)
 			wndBarBackground:SetBGColor(ApolloColor.new(nR, nG, nB, nA))
 
-			if Threat.tOptions.profile.tList.nColorMode == 1 then
-				if nIndex == 1 then
-					local tColor = Threat.tOptions.profile.tList.tColors.tTank or tWhite
-					local Color = ApolloColor.new((tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255))
-					self.wndList:GetChildren()[nIndex]:FindChild("Background"):SetBGColor(Color)
-				elseif nIndex == 7 then
-					local tColor = Threat.tOptions.profile.tList.tColors.tHealer or tWhite
-					local Color = ApolloColor.new((tColor.nR / 255), (tColor.nG / 255), (tColor.nB / 255), (tColor.nA / 255))
-					self.wndList:GetChildren()[nIndex]:FindChild("Background"):SetBGColor(Color)
-				end
-			end
+			self:PreviewSetRoleColor(nIndex, tEntry)
 
 			if nBars == nIndex then break end
 		end
