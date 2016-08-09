@@ -56,7 +56,7 @@ function Settings:ModuleSetBack(Module, Id)
 	BG:Show(false)
 	BG:SetTextColor(ApolloColor.new(1,1,1,0.15))
 
-	Module.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+	Module.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLocked)
 	Module.bInPreview = false
 
 	if self.nCurrentTab == Id then Module:Clear() end
@@ -181,7 +181,7 @@ function Settings:GeneralApplyCurrent()
 	if self.nCurrentTab ~= 1 then return end
 	
 	self.wndContainer:FindChild("BtnEnable"):SetCheck(Threat.tOptions.profile.bEnabled)
-	self.wndContainer:FindChild("BtnLock"):SetCheck(Threat.tOptions.profile.bLock)
+	self.wndContainer:FindChild("BtnLock"):SetCheck(Threat.tOptions.profile.bLocked)
 	self.wndContainer:FindChild("BtnShowSolo"):SetCheck(Threat.tOptions.profile.bShowSolo)
 
 	local wndSlider = self.wndContainer:FindChild("SliderUpdateRate")
@@ -216,7 +216,7 @@ function Settings:OnBtnEnable(wndHandler, wndControl)
 end
 
 function Settings:OnBtnLock(wndHandler, wndControl)
-	Threat.tOptions.profile.bLock = wndControl:IsChecked()
+	Threat.tOptions.profile.bLocked = wndControl:IsChecked()
 	Threat:GetModule("Main"):UpdateLockStatus()
 end
 

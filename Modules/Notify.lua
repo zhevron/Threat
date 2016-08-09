@@ -105,7 +105,7 @@ end
 function Notify:OnMouseEnter(wndHandler, wndControl)
 	if wndControl ~= self.wndMain then return end
 
-	if not Threat.tOptions.profile.bLock then
+	if not Threat.tOptions.profile.bLocked then
 		self.wndMain:FindChild("Background"):Show(true)
 	end
 end
@@ -120,7 +120,7 @@ end
 
 function Notify:OnMouseButtonUp(wndHandler, wndControl, eMouseButton)
 	if eMouseButton == GameLib.CodeEnumInputMouse.Right then
-		if not Threat.tOptions.profile.bLock or Threat:GetModule("Settings").wndMain:IsShown() then
+		if not Threat.tOptions.profile.bLocked or Threat:GetModule("Settings").wndMain:IsShown() then
 			Threat:GetModule("Settings"):Open(3)
 		end
 	end
@@ -148,8 +148,8 @@ end
 function Notify:UpdateLockStatus()
 	if self.wndMain == nil then return end
 
-	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLock)
-	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLock)
+	self.wndMain:SetStyle("Moveable", not Threat.tOptions.profile.bLocked)
+	self.wndMain:SetStyle("IgnoreMouse", Threat.tOptions.profile.bLocked)
 end
 
 function Notify:Preview(bHigh)

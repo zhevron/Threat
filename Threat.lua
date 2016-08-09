@@ -20,7 +20,7 @@ Threat.tDefaults = {
 	profile = {
 		bEnabled = true,
 		bShowSolo = false,
-		bLock = false,
+		bLocked = false,
 		nUpdateRate = 0.4,
 		
 		tList = {
