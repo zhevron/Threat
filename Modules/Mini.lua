@@ -37,19 +37,19 @@ end
 
 --[[ Update and Clear ]]--
 
-function Mini:Update(nPlayerValue, nTopThreatFirst, nTopThreatSecond, nTopThreatTank)
+function Mini:Update(nPlayerValue, nTopThreatFirst, nTopThreatSecond, nTopThreatTank, bIsPlayerTank)
 	if self.wndMain == nil or self.bInPreview then return end
 
 	local nPercent
 
-	if Threat.tOptions.profile.tMini.bDifferenceToTank and nTopThreatTank ~= 0 then
+	if not bIsPlayerTank and Threat.tOptions.profile.tMini.bDifferenceToTank and nTopThreatTank ~= 0 then
 		nPercent = nPlayerValue / nTopThreatTank
 	else
 		nPercent = nPlayerValue / nTopThreatFirst
-	end
 
-	if nPercent == 1 and nTopThreatSecond ~= 0 then
-		nPercent = nPlayerValue / nTopThreatSecond
+		if nPercent == 1 and nTopThreatSecond ~= 0 then
+			nPercent = nPlayerValue / nTopThreatSecond
+		end
 	end
 
 	self:UpdateText(nPercent)
@@ -86,7 +86,7 @@ function Mini:UpdateText(nPercent)
 	else
 		--Over
 		Color = ApolloColor.new(tColors.tOver.nR / 255, tColors.tOver.nG / 255, tColors.tOver.nB / 255, 255)
-		if nPercent > 9.9 then Text = "+++%" end
+		if nPercent > 9.9 then Text = "High" end
 	end
 
 	self.wndOutput:SetText(Text)

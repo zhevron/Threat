@@ -166,7 +166,7 @@ function Main:UpdateUI()
 
 	-- Mini:
 	if bMiniActive then
-		Threat:GetModule("Mini"):Update(nPlayerValue, nTopThreatFirst, nTopThreatSecond, nTopThreatTank)
+		Threat:GetModule("Mini"):Update(nPlayerValue, nTopThreatFirst, nTopThreatSecond, nTopThreatTank, bIsPlayerTank)
 	end
 
 end
