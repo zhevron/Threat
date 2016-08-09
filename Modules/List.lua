@@ -5,15 +5,14 @@ require "GroupLib"
 local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:GetAddon("Threat")
 local List = Threat:NewModule("List")
 
-List.nBarHeight = 10
 List.nBarSlots = 0
-
 List.bInPreview = false
 
 --[[ Initial functions ]]--
 
 function List:OnInitialize()
 	self.oXml = XmlDoc.CreateFromFile("Forms/List.xml")
+	Apollo.LoadSprites("Textures/Threat_Textures.xml", "")
 
 	if self.oXml == nil then
 		Apollo.AddAddonErrorText(Threat, "Could not load the Threat list window!")
@@ -30,17 +29,12 @@ function List:OnDocumentReady()
 	self:UpdatePosition()
 	self:UpdateLockStatus()
 
-	--Get Bar Size
-	local wndBarTemp = Apollo.LoadForm(self.oXml, "Bar", nil, self)
-	self.nBarHeight = wndBarTemp:GetHeight()
-	wndBarTemp:Destroy()
-
 	self:SetBarSlots()
 end
 
 function List:SetBarSlots()
 	local nOffset = Threat.tOptions.profile.tList.nBarOffset
-	self.nBarSlots = math.floor((self.wndList:GetHeight() + nOffset) / (self.nBarHeight + nOffset))
+	self.nBarSlots = math.floor((self.wndList:GetHeight() + nOffset) / (Threat.tOptions.profile.tList.nBarHeight + nOffset))
 end
 
 function List:OnEnable()
@@ -97,9 +91,15 @@ function List:CreateBars(nTListNum)
 end
 
 function List:SetBarOptions(wndBar)
+	if Threat.tOptions.profile.tList.nBarStyle == 1 then
+		wndBar:FindChild("Background"):SetSprite("Threat_Textures:Threat_Smooth")
+	elseif Threat.tOptions.profile.tList.nBarStyle == 2 then
+		wndBar:FindChild("Background"):SetSprite("Threat_Textures:Threat_Edge")
+	end
+
 	local nOffset = Threat.tOptions.profile.tList.nBarOffset
 	local nL, nT, nR, nB = wndBar:GetAnchorOffsets()
-	wndBar:SetAnchorOffsets(nL, nT, nR, nB + nOffset)
+	wndBar:SetAnchorOffsets(nL, nT, nR, Threat.tOptions.profile.tList.nBarHeight + nOffset)
 
 	for _, v in ipairs(wndBar:GetChildren()) do
 		local nL, nT, nR, nB = v:GetAnchorOffsets()
@@ -368,7 +368,8 @@ function List:PreviewColor()
 	end
 end
 
-function List:PreviewBarOffset()
+function List:PreviewFullReload()
 	self.wndList:DestroyChildren()
+	self:SetBarSlots()
 	self:Preview()
 end

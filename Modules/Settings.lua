@@ -267,10 +267,15 @@ function Settings:ListApplyCurrent()
 	self.wndContainer:FindChild("BtnRoleColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 1)
 	self.wndContainer:FindChild("BtnClassColors"):SetCheck(Threat.tOptions.profile.tList.nColorMode == 2)
 
-	self.wndContainer:FindChild("BtnBarDefault"):SetCheck(false)
-	self.wndContainer:FindChild("BtnBarNoBorder"):SetCheck(false)
+	self.wndContainer:FindChild("BtnBarFlat"):SetCheck(Threat.tOptions.profile.tList.nBarStyle == 0)
+	self.wndContainer:FindChild("BtnBarSmooth"):SetCheck(Threat.tOptions.profile.tList.nBarStyle == 1)
+	self.wndContainer:FindChild("BtnBarEdge"):SetCheck(Threat.tOptions.profile.tList.nBarStyle == 2)
 
-	local wndSlider = self.wndContainer:FindChild("SliderBarOffset")
+	local wndSlider = self.wndContainer:FindChild("SliderBarHeight")
+	wndSlider:FindChild("SliderBar"):SetValue(Threat.tOptions.profile.tList.nBarHeight)
+	wndSlider:FindChild("SliderOutput"):SetText(Threat.tOptions.profile.tList.nBarHeight.." px")
+
+	wndSlider = self.wndContainer:FindChild("SliderBarOffset")
 	wndSlider:FindChild("SliderBar"):SetValue(Threat.tOptions.profile.tList.nBarOffset)
 	wndSlider:FindChild("SliderOutput"):SetText(Threat.tOptions.profile.tList.nBarOffset.." px")
 
@@ -281,7 +286,7 @@ function Settings:ListApplyCurrent()
 
 	self:ListCreateColors()
 
-	Threat:GetModule("List"):PreviewBarOffset()
+	Threat:GetModule("List"):PreviewFullReload()
 	Threat:GetModule("List").wndMain:FindChild("Background"):SetTextColor(ApolloColor.new(1,1,1,0))
 end
 
@@ -303,12 +308,19 @@ function Settings:OnBtnClassColors(wndHandler, wndControl)
 end
 
 --Bar Style
-function Settings:OnBtnBarDefault(wndHandler, wndControl)
-	
+function Settings:OnBtnBarFlat(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.nBarStyle = 0
+	Threat:GetModule("List"):PreviewFullReload()
 end
 
-function Settings:OnBtnBarNoBorder(wndHandler, wndControl)
-	
+function Settings:OnBtnBarSmooth(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.nBarStyle = 1
+	Threat:GetModule("List"):PreviewFullReload()
+end
+
+function Settings:OnBtnBarEdge(wndHandler, wndControl)
+	Threat.tOptions.profile.tList.nBarStyle = 2
+	Threat:GetModule("List"):PreviewFullReload()
 end
 
 -- Checkboxes
@@ -334,6 +346,16 @@ end
 
 -- Sliders
 
+function Settings:OnSliderBarHeight(wndHandler, wndControl, fNewValue, fOldValue)
+	if Threat.tOptions.profile.tList.nBarHeight == fNewValue then return end
+
+	local wndCurrSlider = wndControl:GetParent():GetParent()
+	wndCurrSlider:FindChild("SliderOutput"):SetText(fNewValue.." px")
+	Threat.tOptions.profile.tList.nBarHeight = fNewValue
+
+	Threat:GetModule("List"):PreviewFullReload()
+end
+
 function Settings:OnSliderBarOffset(wndHandler, wndControl, fNewValue, fOldValue)
 	if Threat.tOptions.profile.tList.nBarOffset == fNewValue then return end
 
@@ -341,7 +363,7 @@ function Settings:OnSliderBarOffset(wndHandler, wndControl, fNewValue, fOldValue
 	wndCurrSlider:FindChild("SliderOutput"):SetText(fNewValue.." px")
 	Threat.tOptions.profile.tList.nBarOffset = fNewValue
 
-	Threat:GetModule("List"):PreviewBarOffset()
+	Threat:GetModule("List"):PreviewFullReload()
 end
 
 -- Other
