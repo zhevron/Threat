@@ -6,7 +6,7 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat",
 Threat.tVersion = {
 	nMajor = 2,
 	nMinor = 0,
-	nBuild = 0
+	nBuild = 1
 }
 
 --[[
