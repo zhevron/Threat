@@ -100,6 +100,7 @@ function Settings:Open(nTab)
 	self:LoadTab(nTab)
 
 	self.wndMain:Show(true)
+	self.wndMain:ToFront()
 end
 
 function Settings:LoadTab(nTab)
