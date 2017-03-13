@@ -5,8 +5,8 @@ local Threat = Apollo.GetPackage("Gemini:Addon-1.1").tPackage:NewAddon("Threat",
 
 Threat.tVersion = {
 	nMajor = 2,
-	nMinor = 0,
-	nBuild = 4
+	nMinor = 1,
+	nBuild = 0
 }
 
 --[[
@@ -125,7 +125,7 @@ function Threat:OnInitialize()
 	self.tOptions.RegisterCallback(self, "OnProfileReset", "OnProfileReset")
 	self.tOptions.RegisterCallback(self, "OnProfileCopied", "OnProfileCopied")
 
-	Apollo.RegisterSlashCommand("threat", "OnSlashCommand", self)
+	Apollo.RegisterSlashCommand("threat", "OnConfigure", self)
 end
 
 function Threat:OnEnable()
@@ -138,7 +138,7 @@ function Threat:OnConfigure()
 	self:GetModule("Settings"):Open(1)
 end
 
-function Threat:OnSlashCommand()
+function Threat:OnSlashCommand() --Unused
 	local Main = self:GetModule("Main")
 	self.tOptions.profile.bEnabled = not Main:IsEnabled()
 	if Main:IsEnabled() then

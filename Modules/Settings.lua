@@ -36,7 +36,7 @@ end
 
 function Settings:OnDocumentReady()
 	self.wndMain = Apollo.LoadForm(self.oXml, "Settings", nil, self)
-	self.wndMain:FindChild("TitleAddon"):SetText(string.format("Threat v%d.%d.%d", Threat.tVersion.nMajor, Threat.tVersion.nMinor, Threat.tVersion.nBuild))
+	self.wndMain:FindChild("Version"):SetText(string.format("v%d.%d.%d", Threat.tVersion.nMajor, Threat.tVersion.nMinor, Threat.tVersion.nBuild))
 	self.wndMain:Show(false)
 
 	self.wndContainer = self.wndMain:FindChild("Container")
@@ -241,6 +241,7 @@ end
 
 function Settings:OnBtnProfileSelect(wndHandler, wndControl)
 	self.wndContainer:FindChild("ProfileNameSelected"):SetText(wndControl:GetText())
+	self.wndContainer:FindChild("BtnCopyProfile"):Enable(true)
 end
 
 function Settings:OnBtnCopyProfile(wndHandler, wndControl)
