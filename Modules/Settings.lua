@@ -13,6 +13,12 @@ Settings.tModeNames = {
 	[3] = "Only in Raid",
 	[4] = "Enabled",
 }
+Settings.tTabFormNames = {
+	[1] = "GeneralSettings",
+	[2] = "ListSettings",
+	[3] = "NotifySettings",
+	[4] = "MiniSettings",
+}
 
 --
 --	Initialzation
@@ -79,8 +85,8 @@ function Settings:OnClose(wndHandler, wndControl)
 	self:ModuleSetBack(Threat:GetModule("Mini"), 4)
 
 	self.nCurrentTab = 0
-	self.wndMain:Show(false)
 	self.wndContainer:DestroyChildren()
+	self.wndMain:Close()
 end
 
 function Settings:Open(nTab)
@@ -90,12 +96,9 @@ function Settings:Open(nTab)
 	self:ModuleSetUp(Threat:GetModule("Notify"))
 	self:ModuleSetUp(Threat:GetModule("Mini"))
 
-	local wndTabs = self.wndMain:FindChild("Navigation")
-
-	wndTabs:FindChild("TabGeneral"):SetCheck(nTab == 1)
-	wndTabs:FindChild("TabList"):SetCheck(nTab == 2)
-	wndTabs:FindChild("TabNotify"):SetCheck(nTab == 3)
-	wndTabs:FindChild("TabMini"):SetCheck(nTab == 4)
+	for k,v in ipairs(self.wndMain:FindChild("Navigation"):GetChildren()) do
+		v:SetCheck(v:GetContentId() == nTab)
+	end
 
 	self:LoadTab(nTab)
 
@@ -115,32 +118,17 @@ function Settings:LoadTab(nTab)
 	self.wndContainer:DestroyChildren()
 	self.nCurrentTab = nTab
 
-	if nTab == 1 then
-		Apollo.LoadForm(self.oXml, "GeneralSettings", self.wndContainer, self)
-		self:GeneralApplyCurrent()
-	elseif nTab == 2 then
-		Apollo.LoadForm(self.oXml, "ListSettings", self.wndContainer, self)
-		self:ListApplyCurrent()
-	elseif nTab == 3 then
-		Apollo.LoadForm(self.oXml, "NotifySettings", self.wndContainer, self)
-		self:NotifyApplyCurrent()
-	elseif nTab == 4 then
-		Apollo.LoadForm(self.oXml, "MiniSettings", self.wndContainer, self)
-		self:MiniApplyCurrent()
+	Apollo.LoadForm(self.oXml, self.tTabFormNames[nTab], self.wndContainer, self)
+
+	if nTab == 1 then self:GeneralApplyCurrent()
+	elseif nTab == 2 then self:ListApplyCurrent()
+	elseif nTab == 3 then self:NotifyApplyCurrent()
+	elseif nTab == 4 then self:MiniApplyCurrent()
 	end
 end
 
-function Settings:OnTabGeneral(wndHandler, wndControl)
-	self:LoadTab(1)
-end
-function Settings:OnTabList(wndHandler, wndControl)
-	self:LoadTab(2)
-end
-function Settings:OnTabNotify(wndHandler, wndControl)
-	self:LoadTab(3)
-end
-function Settings:OnTabMini(wndHandler, wndControl)
-	self:LoadTab(4)
+function Settings:OnTab(wndHandler, wndControl)
+	self:LoadTab(wndControl:GetContentId())
 end
 
 function Settings:OnModeDropdownOpen(wndHandler, wndControl)
@@ -148,18 +136,22 @@ function Settings:OnModeDropdownOpen(wndHandler, wndControl)
 end
 
 function Settings:OnModeDropdownClose(wndHandler, wndControl)
-	self.wndContainer:FindChild("ModeDropDownWindow"):Show(false)
+	self.wndContainer:FindChild("ModeDropDownWindow"):Close(false)
+end
+
+function Settings:OnModeDropdownClosed(wndHandler, wndControl)
+	self.wndContainer:FindChild("BtnModeDropDown"):SetCheck(false)
 end
 
 function Settings:OnModeChange(wndHandler, wndControl)
-	local strOptionName = wndControl:GetText()
-	local nOption = 0
+	--local strOptionName = wndControl:GetText()
+	local nOption = wndControl:GetContentId()
 
-	for k,v in ipairs(self.tModeNames) do
-		if v == strOptionName then nOption = k break end
-	end
+	--for k,v in ipairs(self.tModeNames) do
+	--	if v == strOptionName then nOption = k break end
+	--end
 
-	self.wndContainer:FindChild("ModeDropDownWindow"):Show(false)
+	self.wndContainer:FindChild("ModeDropDownWindow"):Close(false)
 
 	if self.nCurrentTab == 2 then
 		Threat.tOptions.profile.tList.nShow = nOption
@@ -169,9 +161,7 @@ function Settings:OnModeChange(wndHandler, wndControl)
 		Threat.tOptions.profile.tMini.nShow = nOption
 	end
 
-	local wndButton = self.wndContainer:FindChild("BtnModeDropDown")
-	wndButton:SetCheck(false)
-	wndButton:SetText(strOptionName)
+	self.wndContainer:FindChild("BtnModeDropDown"):SetText(self.tModeNames[nOption])
 end
 
 --
