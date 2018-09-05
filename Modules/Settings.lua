@@ -337,7 +337,6 @@ function Settings:OnBtnShowSelfWarning(wndHandler, wndControl)
 end
 
 -- Sliders
-
 function Settings:OnSliderBarHeight(wndHandler, wndControl, fNewValue, fOldValue)
 	if Threat.tOptions.profile.tList.nBarHeight == fNewValue then return end
 
